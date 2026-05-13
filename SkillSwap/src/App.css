@@ -91,7 +91,7 @@
 
   @media (max-width: 1024px) {
     flex-direction: column;
-    text-align: center;
+    text-align: left;
   }
 }
 
@@ -149,6 +149,14 @@
       width: 100%;
       justify-content: center;
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body, #root {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
     }
   }
 }
