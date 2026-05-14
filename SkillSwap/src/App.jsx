@@ -12,27 +12,17 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Redirect "/" ke login */}
-        <Route path="/" element={<Navigate to="/superadmin/login" />} />
+        <Route path="/" element={<Navigate to="/superadmin/dashboard" />} />
 
         {/* Halaman login — bebas diakses */}
         <Route path="/superadmin/login" element={<LoginSuperadmin />} />
 
         {/* Halaman yang butuh login */}
-        <Route path="/superadmin/dashboard" element={
-          <ProtectedRoute><DashboardSuperadmin /></ProtectedRoute>
-        } />
-        <Route path="/superadmin/kelola-user" element={
-          <ProtectedRoute><KelolaUser /></ProtectedRoute>
-        } />
-        <Route path="/superadmin/kelola-admin" element={
-          <ProtectedRoute><KelolaAdmin /></ProtectedRoute>
-        } />
-        <Route path="/superadmin/laporan" element={
-          <ProtectedRoute><Laporan /></ProtectedRoute>
-        } />
-        <Route path="/superadmin/statistik" element={
-          <ProtectedRoute><Statistik /></ProtectedRoute>
-        } />
+        <Route path="/superadmin/dashboard" element={<DashboardSuperadmin />} />
+        <Route path="/superadmin/kelola-user" element={<KelolaUser />} />
+        <Route path="/superadmin/kelola-admin" element={<KelolaAdmin />} />
+        <Route path="/superadmin/laporan" element={<Laporan />} />
+        <Route path="/superadmin/statistik" element={<Statistik />} />
       </Routes>
     </BrowserRouter>
   );
