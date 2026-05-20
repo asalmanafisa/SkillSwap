@@ -4,30 +4,29 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, FileText,
-  Settings, LogOut, Activity,
+  LogOut, Activity,
   AlertTriangle, UserX,
 } from "lucide-react";
 
 const laporanMasuk = [
-  { id: 1, title: "Mengirim spam",         desc: "Dilaporkan oleh Amira Salma Nafisa ter...", color: "#ef4444" },
-  { id: 2, title: "Konten tidak pantas",   count: 14, desc: "Dilaporkan oleh Farah Naylul Fauzia", color: "#f97316" },
-  { id: 3, title: "Penipuan skill",        desc: "Pengguna mengaku memiliki skill yang...",   color: "#ef4444" },
-  { id: 4, title: "Permintaan verifikasi", desc: "Diana Putri meminta verifikasi akun prof...", color: "#3b82f6" },
-  { id: 5, title: "Akun duplikat",         desc: "Terdeteksi 2 akun dengan email yang sa...", color: "#f97316" },
+  { id: 1, title: "Konten tidak pantas",         desc: "Dilaporkan oleh Amira Salma Nafisa", color: "#ef4444" },
+  { id: 2, title: "Spam atau penipuan skill", desc: "Dilaporkan oleh Farah Naylul Fauzia", color: "#f97316" },
+  { id: 3, title: "Pelecehan atau bullying",        desc: "Dilaporkan oleh Yasmine Shavira Ahmad",   color: "#ef4444" },
+  { id: 4, title: "Akun palsu/duplikat",   desc: "Dilaporkan oleh Tabina Naila Griselda", color: "#22c55e" },
 ];
 
 const daftarPengguna = [
   { id: 1, nama: "Farah Naylul Fauzia",   role: "Desainer · Surabaya",        avatar: "FN", warna: "#f97316", status: "Aktif"   },
   { id: 2, nama: "Yasmine Shavira Ahmad", role: "Programmer · Malang",         avatar: "YS", warna: "#22c55e", status: "Aktif"   },
   { id: 3, nama: "Tabina Naila Griselda", role: "Data Analyst · Surabaya",     avatar: "TN", warna: "#8b5cf6", status: "Aktif"   },
-  { id: 4, nama: "Sekar Suryawati",       role: "Digital Marketing · Jakarta", avatar: "SS", warna: "#14b8a6", status: "Pending" },
+  { id: 4, nama: "Sekar Suryawati",       role: "Digital Marketing · Jakarta", avatar: "SS", warna: "#14b8a6", status: "Suspended" },
 ];
 
 const statCards = [
   { label: "Total Pengguna",      value: "5.284", sub: "+12% bulan ini",   subColor: "#22c55e", iconEl: "users",    iconBg: "#eff6ff", iconColor: "#3b82f6" },
   { label: "Sesi Aktif",          value: "1.047", sub: "+8% minggu ini",   subColor: "#22c55e", iconEl: "activity", iconBg: "#f0fdf4", iconColor: "#22c55e" },
-  { label: "Laporan Masuk",       value: "23",    sub: "+5 baru hari ini", subColor: "#ef4444", iconEl: "alert",    iconBg: "#fff7ed", iconColor: "#f97316" },
-  { label: "Pengguna Tersuspend", value: "14",    sub: "+2 minggu ini",    subColor: "#ef4444", iconEl: "userx",    iconBg: "#fef2f2", iconColor: "#ef4444" },
+  { label: "Laporan Masuk",       value: "4",    sub: "+2 minggu ini", subColor: "#ef4444", iconEl: "alert",    iconBg: "#fff7ed", iconColor: "#f97316" },
+  { label: "Pengguna Tersuspend", value: "1",    sub: "+1 minggu ini",    subColor: "#ef4444", iconEl: "userx",    iconBg: "#fef2f2", iconColor: "#ef4444" },
 ];
 
 function SidebarAdmin({ active }) {
@@ -93,20 +92,7 @@ function SidebarAdmin({ active }) {
           LAINNYA
         </div>
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-          <li>
-            <button
-              onClick={() => navigate("/admin/pengaturan")}
-              style={{
-                display: "flex", alignItems: "center", gap: 9,
-                padding: "9px 10px", borderRadius: 8,
-                width: "100%", border: "none", cursor: "pointer",
-                fontSize: "0.83rem", fontWeight: 500,
-                background: "transparent", color: "#64748b", textAlign: "left",
-              }}
-            >
-              <Settings size={16} /> Pengaturan
-            </button>
-          </li>
+          
           <li>
             <button
               onClick={() => setShowLogout(true)}
@@ -165,6 +151,9 @@ function SidebarAdmin({ active }) {
 
 export default function DashboardAdmin() {
   const navigate = useNavigate();
+  const [showSuspend, setShowSuspend] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [penggunaList, setPenggunaList] = useState(daftarPengguna);
 
   return (
     <div style={{
@@ -173,10 +162,10 @@ export default function DashboardAdmin() {
     }}>
       <SidebarAdmin active="dashboard" />
 
-      <main style={{ flex: 1, padding: "24px 28px", overflowY: "auto", minWidth: 0 }}>
+      <main style={{ flex: 1, padding: "18px 22px", overflowY: "auto", minWidth: 0 }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 22 }}>
+        <div style={{ marginBottom: 16, textAlign: "left" }}>
           <h1 style={{ fontSize: "1.4rem", fontWeight: 700, color: "#1e293b", margin: 0 }}>
             Dashboard Admin
           </h1>
@@ -186,7 +175,7 @@ export default function DashboardAdmin() {
         </div>
 
         {/* Stat Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 22 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}>
           {statCards.map((c) => (
             <div key={c.label} style={{
               background: "white", borderRadius: 14,
@@ -205,7 +194,7 @@ export default function DashboardAdmin() {
                   {c.iconEl === "userx"    && <UserX size={20} />}
                 </div>
               </div>
-              <div style={{ fontSize: "1.6rem", fontWeight: 700, color: "#1e293b", lineHeight: 1 }}>{c.value}</div>
+              <div style={{ fontSize: "1.4rem", fontWeight: 700, color: "#1e293b", lineHeight: 1 }}>{c.value}</div>
               <div style={{ fontSize: "0.72rem", color: c.subColor, marginTop: 6 }}>
                 {c.subColor === "#22c55e" ? "▲" : "▼"} {c.sub}
               </div>
@@ -214,7 +203,7 @@ export default function DashboardAdmin() {
         </div>
 
         {/* Tengah */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 12 }}>
 
           {/* Laporan Masuk */}
           <div style={{ background: "white", borderRadius: 14, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
@@ -266,7 +255,7 @@ export default function DashboardAdmin() {
               ))}
             </div>
 
-            {daftarPengguna.map((user) => (
+            {penggunaList.map((user) => (
               <div key={user.id} style={{
                 display: "grid", gridTemplateColumns: "1fr 120px 80px",
                 gap: 8, padding: "10px 8px", alignItems: "center",
@@ -296,15 +285,18 @@ export default function DashboardAdmin() {
                   </span>
                 </div>
                 <div>
-                  <button style={{
-                    padding: "4px 12px", borderRadius: 6,
-                    border: user.status === "Aktif" ? "1px solid #fecaca" : "1px solid #fed7aa",
-                    background: user.status === "Aktif" ? "#fef2f2" : "#fff7ed",
-                    color: user.status === "Aktif" ? "#ef4444" : "#f97316",
-                    fontSize: "0.72rem", fontWeight: 600, cursor: "pointer",
-                  }}>
-                    {user.status === "Aktif" ? "Suspend" : "Tinjau"}
-                  </button>
+                  <button
+        onClick={() => { setSelectedUser(user); setShowSuspend(true); }}
+        style={{
+        padding: "4px 12px", borderRadius: 6,
+        border: user.status === "Aktif" ? "1px solid #fecaca" : "1px solid #fed7aa",
+        background: user.status === "Aktif" ? "#fef2f2" : "#fff7ed",
+        color: user.status === "Aktif" ? "#ef4444" : "#f97316",
+        fontSize: "0.72rem", fontWeight: 600, cursor: "pointer",
+        }}
+      >
+        {user.status === "Aktif" ? "Suspend" : "Tinjau"}
+      </button>
                 </div>
               </div>
             ))}
@@ -315,6 +307,78 @@ export default function DashboardAdmin() {
         <div style={{ textAlign: "center", marginTop: 28, fontSize: "0.72rem", color: "#94a3b8", paddingBottom: 16 }}>
           © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
         </div>
+        {/* Popup Konfirmasi Suspend */}
+{showSuspend && selectedUser && (
+  <div style={{
+    position: "fixed", inset: 0,
+    background: "rgba(0,0,0,0.35)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 1000,
+  }}>
+    <div style={{
+      background: "white", borderRadius: 16,
+      padding: "28px 24px", width: 340,
+      boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+      textAlign: "center",
+    }}>
+      {/* Icon */}
+      <div style={{
+        width: 52, height: 52, borderRadius: "50%",
+        background: "#fff7ed", fontSize: "1.4rem",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        margin: "0 auto 16px",
+      }}>⚠️</div>
+
+      <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#0f172a", margin: "0 0 8px" }}>
+        {selectedUser.status === "Aktif" ? "Suspend Pengguna?" : "Aktifkan Pengguna?"}
+      </h3>
+      <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "0 0 6px", lineHeight: 1.5 }}>
+       {selectedUser.status === "Aktif"
+         ? "Apakah anda yakin ingin mensuspend"
+         : "Apakah anda yakin ingin mengaktifkan kembali"}
+      </p>
+      <p style={{ fontSize: "0.88rem", fontWeight: 700, color: "#1e293b", margin: "0 0 20px" }}>
+        {selectedUser.nama}?
+      </p>
+
+      <div style={{ display: "flex", gap: 10 }}>
+        <button
+          onClick={() => { setShowSuspend(false); setSelectedUser(null); }}
+          style={{
+            flex: 1, padding: "10px", borderRadius: 10,
+            border: "1px solid #e2e8f0", background: "white",
+            color: "#64748b", fontSize: "0.85rem",
+            fontWeight: 500, cursor: "pointer",
+          }}
+        >
+          Batal
+        </button>
+        <button
+        onClick={() => {
+          setPenggunaList((prev) =>
+            prev.map((u) =>
+              u.id === selectedUser.id
+               ? { ...u, status: u.status === "Aktif" ? "Suspended" : "Aktif" }
+               : u
+              )
+          );
+            setShowSuspend(false);
+         setSelectedUser(null);
+       }}
+        style={{
+          flex: 1, padding: "10px", borderRadius: 10,
+          border: "none",
+          background: selectedUser.status === "Aktif" ? "#ef4444" : "#22c55e",
+           color: "white", fontSize: "0.85rem",
+         fontWeight: 600, cursor: "pointer",
+        }}
+      >
+       {selectedUser.status === "Aktif" ? "Ya, Suspend" : "Ya, Aktifkan"}
+      </button>
+      </div>
+    </div>
+  </div>
+)}
       </main>
     </div>
   );
