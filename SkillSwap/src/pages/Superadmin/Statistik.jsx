@@ -9,36 +9,36 @@ import {
 
 // ── Data dummy ────────────────────────────────────────────
 const monthlyData = [
-  { bulan: "Jan", pengguna: 320, sesi: 210, laporan: 8  },
-  { bulan: "Feb", pengguna: 410, sesi: 290, laporan: 12 },
-  { bulan: "Mar", pengguna: 530, sesi: 380, laporan: 6  },
-  { bulan: "Apr", pengguna: 620, sesi: 470, laporan: 23 },
-  { bulan: "Mei", pengguna: 480, sesi: 350, laporan: 10 },
-  { bulan: "Jun", pengguna: 700, sesi: 540, laporan: 15 },
-  { bulan: "Jul", pengguna: 650, sesi: 490, laporan: 9  },
-  { bulan: "Agu", pengguna: 780, sesi: 600, laporan: 18 },
-  { bulan: "Sep", pengguna: 590, sesi: 420, laporan: 7  },
-  { bulan: "Okt", pengguna: 820, sesi: 650, laporan: 20 },
-  { bulan: "Nov", pengguna: 760, sesi: 580, laporan: 14 },
-  { bulan: "Des", pengguna: 900, sesi: 720, laporan: 11 },
+  { bulan: "Jan", pengguna: 3, sesi: 2, laporan: 8  },
+  { bulan: "Feb", pengguna: 4, sesi: 2, laporan: 1 },
+  { bulan: "Mar", pengguna: 5, sesi: 3, laporan: 6  },
+  { bulan: "Apr", pengguna: 6, sesi: 4, laporan: 2 },
+  { bulan: "Mei", pengguna: 4, sesi: 3, laporan: 1 },
+  { bulan: "Jun", pengguna: 7, sesi: 5, laporan: 1 },
+  { bulan: "Jul", pengguna: 6, sesi: 4, laporan: 9  },
+  { bulan: "Agu", pengguna: 7, sesi: 6, laporan: 1 },
+  { bulan: "Sep", pengguna: 5, sesi: 4, laporan: 7  },
+  { bulan: "Okt", pengguna: 8, sesi: 6, laporan: 2 },
+  { bulan: "Nov", pengguna: 7, sesi: 5, laporan: 1 },
+  { bulan: "Des", pengguna: 9, sesi: 7, laporan: 1 },
 ];
 
 const weeklyData = [
-  { hari: "Sen", pengguna: 80,  sesi: 60,  laporan: 2 },
-  { hari: "Sel", pengguna: 120, sesi: 90,  laporan: 5 },
-  { hari: "Rab", pengguna: 95,  sesi: 70,  laporan: 3 },
-  { hari: "Kam", pengguna: 150, sesi: 110, laporan: 7 },
-  { hari: "Jum", pengguna: 130, sesi: 95,  laporan: 4 },
-  { hari: "Sab", pengguna: 160, sesi: 130, laporan: 2 },
-  { hari: "Min", pengguna: 110, sesi: 80,  laporan: 1 },
+  { hari: "Sen", pengguna: 8,  sesi: 6,  laporan: 2 },
+  { hari: "Sel", pengguna: 1, sesi: 9,  laporan: 5 },
+  { hari: "Rab", pengguna: 9,  sesi: 7,  laporan: 3 },
+  { hari: "Kam", pengguna: 1, sesi: 1, laporan: 7 },
+  { hari: "Jum", pengguna: 1, sesi: 9,  laporan: 4 },
+  { hari: "Sab", pengguna: 1, sesi: 1, laporan: 2 },
+  { hari: "Min", pengguna: 1, sesi: 8,  laporan: 1 },
 ];
 
 const topUsers = [
   { name: "Amira Salma Nafisa", skill: "UI/UX Design",    sesi: 48, status: "Aktif"      },
   { name: "Farah Naylul Fauzia", skill: "Web Development", sesi: 42, status: "Aktif"      },
-  { name: "Diana Putri",         skill: "Data Science",    sesi: 39, status: "Verifikasi" },
-  { name: "Budi Santoso",        skill: "Mobile Dev",      sesi: 35, status: "Aktif"      },
-  { name: "Citra Dewi",          skill: "Graphic Design",  sesi: 30, status: "Aktif"      },
+  { name: "Yasmine Shavira Ahmad",         skill: "Data Science",    sesi: 39, status: "Aktif" },
+  { name: "Tabina Naila Griselda",        skill: "Mobile Dev",      sesi: 35, status: "Aktif"      },
+  { name: "Sekar Suryawati",          skill: "Graphic Design",  sesi: 30, status: "Tersuspend"      },
 ];
 
 export default function Statistik() {
@@ -70,10 +70,10 @@ export default function Statistik() {
         {/* ── Summary Cards ────────────────────────────── */}
         <div className="summary-cards">
           {[
-            { label: "Total Pengguna", value: "5.284", sub: "+12% dari bulan lalu",  color: "#3b82f6" },
-            { label: "Sesi Aktif",     value: "1.047", sub: "+8% dari minggu lalu",  color: "#22c55e" },
-            { label: "Total Laporan",  value: "23",    sub: "+5 baru hari ini",       color: "#f97316" },
-            { label: "Pengguna Baru",  value: "318",   sub: "Bulan April 2026",       color: "#8b5cf6" },
+            { label: "Total Pengguna", value: "5", sub: "+2 bulan ini",  color: "#3b82f6" },
+            { label: "Sesi Aktif",     value: "4", sub: "+2 minggu ini",  color: "#22c55e" },
+            { label: "Total Laporan",  value: "4",    sub: "+2 minggu ini",       color: "#f97316" },
+            { label: "Pengguna Tersuspend",  value: "1",   sub: "+1 minggu ini",       color: "#8b5cf6" },
           ].map((item) => (
             <div key={item.label} className="summary-card">
               <div className="summary-accent" style={{ background: item.color }} />

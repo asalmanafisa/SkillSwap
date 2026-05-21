@@ -3,8 +3,8 @@ import Sidebar from "../../components/Sidebar";
 
 const initialAdmins = [
   { id: 1, nama: "Farah Naylul Fauzia",   email: "farahfauzia@student.ub.ac.id",  status: "Aktif" },
-  { id: 2, nama: "Amira Salma Nafisa",    email: "asalmanafisa@student.ub.ac.id", status: "Aktif" },
-  { id: 3, nama: "Yasmine Shavira Ahmad", email: "yasminesha@student.ub.ac.id",   status: "Aktif" },
+  { id: 2, nama: "Amira Salma Nafisa",    email: "amira.nafisa@student.ub.ac.id", status: "Aktif" },
+  { id: 3, nama: "Yasmine Shavira Ahmad", email: "yasmineshavira@student.ub.ac.id",   status: "Aktif" },
 ];
 
 export default function KelolaAdmin() {

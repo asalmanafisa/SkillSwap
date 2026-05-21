@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LoginSuperadmin from "./pages/Superadmin/LoginSuperadmin";
 import DashboardSuperadmin from "./pages/Superadmin/DashboardSuperadmin";
 import KelolaUser from "./pages/Superadmin/KelolaUserSuperadmin";
 import KelolaAdmin from "./pages/Superadmin/KelolaAdminSuperadmin";
@@ -13,9 +12,6 @@ function App() {
       <Routes>
         {/* Redirect "/" ke login */}
         <Route path="/" element={<Navigate to="/superadmin/dashboard" />} />
-
-        {/* Halaman login — bebas diakses */}
-        <Route path="/superadmin/login" element={<LoginSuperadmin />} />
 
         {/* Halaman yang butuh login */}
         <Route path="/superadmin/dashboard" element={<DashboardSuperadmin />} />

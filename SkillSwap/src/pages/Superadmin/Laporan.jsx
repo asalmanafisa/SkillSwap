@@ -4,24 +4,19 @@ import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 // ── Data dummy laporan ────────────────────────────────────
 const dummyLaporan = [
-  { id: 1, nama: "Bagas Rizky",        email: "bagas.r@student.ub.ac.id",       jenis: "Pelecehan",         tanggal: "27 Apr 2026", status: "Pending"  },
-  { id: 2, nama: "Yasmine Shavira",    email: "yasmineshavira@student.ub.ac.id", jenis: "Penipuan",          tanggal: "25 Apr 2026", status: "Pending"  },
-  { id: 3, nama: "Rafi Putra",         email: "rafi.putra@student.ub.ac.id",    jenis: "Konten Tidak Pantas",tanggal: "20 Apr 2026", status: "Pending"  },
-  { id: 4, nama: "Amira Salma Nafisa", email: "amirasalma@student.ub.ac.id",    jenis: "Spam",              tanggal: "18 Apr 2026", status: "Pending"  },
-  { id: 5, nama: "Farah Naylul Fauzia",email: "farahnaylul@student.ub.ac.id",   jenis: "Lainnya",           tanggal: "15 Apr 2026", status: "Pending"  },
-  { id: 6, nama: "Diana Putri",        email: "diana.putri@student.ub.ac.id",   jenis: "Spam",              tanggal: "12 Apr 2026", status: "Selesai"  },
-  { id: 7, nama: "Budi Santoso",       email: "budi.s@student.ub.ac.id",        jenis: "Pelecehan",         tanggal: "10 Apr 2026", status: "Ditolak"  },
-  { id: 8, nama: "Citra Dewi",         email: "citra.d@student.ub.ac.id",       jenis: "Penipuan",          tanggal: "8 Apr 2026",  status: "Selesai"  },
+  { id: 2, nama: "Amira Salma Nafisa",    email: "amira.nafisa@student.ub.ac.id", jenis: "Konten tidak pantas",          tanggal: "25 Apr 2026", status: "Pending"  },
+  { id: 3, nama: "Farah Naylul Fauzia",         email: "farahfauzia@student.ub.ac.id",    jenis: "Spam atau penipuan skill",tanggal: "20 Apr 2026", status: "Selesai"  },
+  { id: 4, nama: "Yasmine Shavira Ahmad", email: "yasmineshavira@student.ub.ac.id",    jenis: "Pelecehan atau bullying",              tanggal: "18 Apr 2026", status: "Ditolak"  },
+  { id: 5, nama: "Tabina Naila Griselda",email: "tabinaila@student.ub.ac.id",   jenis: "Akun duplikat/palsu",           tanggal: "15 Apr 2026", status: "Pending"  },
 ];
 
 const STATUS_TABS = ["Semua", "Pending", "Selesai", "Ditolak"];
 
 const jenisColor = {
-  "Pelecehan":          { bg: "#fef2f2", color: "#ef4444" },
-  "Penipuan":           { bg: "#fff7ed", color: "#f97316" },
-  "Konten Tidak Pantas":{ bg: "#fdf4ff", color: "#a855f7" },
-  "Spam":               { bg: "#eff6ff", color: "#3b82f6" },
-  "Lainnya":            { bg: "#f0fdf4", color: "#22c55e" },
+  "Konten tidak pantas":          { bg: "#fef2f2", color: "#ef4444" },
+  "Spam atau penipuan skill":           { bg: "#fff7ed", color: "#f97316" },
+  "Pelecehan atau bullying":{ bg: "#fdf4ff", color: "#a855f7" },
+  "Akun duplikat/palsu":               { bg: "#eff6ff", color: "#3b82f6" },
 };
 
 const statusColor = {
@@ -33,12 +28,14 @@ const statusColor = {
 const ITEMS_PER_PAGE = 6;
 
 export default function Laporan() {
+  const [selectedLaporan, setSelectedLaporan] = useState(null);
+  const [laporanList, setLaporanList] = useState(dummyLaporan);
   const [activeTab, setActiveTab]   = useState("Semua");
   const [search, setSearch]         = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter
-  const filtered = dummyLaporan.filter((l) => {
+  const filtered = laporanList.filter((l) => {
     const matchTab    = activeTab === "Semua" || l.status === activeTab;
     const matchSearch =
       l.nama.toLowerCase().includes(search.toLowerCase()) ||
@@ -63,6 +60,12 @@ export default function Laporan() {
   const selesai  = dummyLaporan.filter((l) => l.status === "Selesai").length;
   const ditolak  = dummyLaporan.filter((l) => l.status === "Ditolak").length;
   const pctSelesai = Math.round((selesai / total) * 100);
+
+  const handleUbahStatus = (id, statusBaru) => {
+  setLaporanList((prev) =>
+    prev.map((l) => l.id === id ? { ...l, status: statusBaru } : l)
+  );
+  };
 
   return (
     <div style={{
@@ -170,10 +173,11 @@ export default function Laporan() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.83rem" }}>
             <thead>
               <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
-                <th style={th}>TERLAPOR</th>
+                <th style={th}>PELAPOR</th>
                 <th style={th}>JENIS LAPORAN</th>
                 <th style={th}>TANGGAL</th>
                 <th style={th}>STATUS</th>
+                <th style={{ ...th, textAlign: "center" }}>AKSI</th>
               </tr>
             </thead>
             <tbody>
@@ -230,6 +234,20 @@ export default function Laporan() {
                           {item.status}
                         </span>
                       </td>
+                      {/* Aksi */}
+      <td style={{ ...td, textAlign: "center" }}>
+        <button
+         onClick={() => setSelectedLaporan(item)}
+          style={{
+            padding: "4px 14px", borderRadius: 6,
+            border: "none", background: "#f1f5f9",
+            color: "#1e3a5f", fontSize: "0.78rem",
+            fontWeight: 700, cursor: "pointer",
+          }}
+        >
+          Detail
+        </button>
+      </td>
                     </tr>
                   );
                 })
@@ -288,6 +306,134 @@ export default function Laporan() {
         }}>
           © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
         </div>
+        {/* Modal Detail Laporan */}
+{selectedLaporan && (
+  <div style={{
+    position: "fixed", inset: 0,
+    background: "rgba(0,0,0,0.35)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 1000,
+  }}>
+    <div style={{
+      background: "white", borderRadius: 16,
+      padding: "24px", width: 420,
+      boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+    }}>
+      {/* Header modal */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+        <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#1e293b", margin: 0 }}>
+          Detail Laporan
+        </h3>
+        <button
+          onClick={() => setSelectedLaporan(null)}
+          style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.2rem", color: "#94a3b8" }}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Info pelapor */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 12,
+        marginBottom: 18, padding: "12px",
+        background: "#f8fafc", borderRadius: 10,
+      }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: "50%",
+          background: "#3b82f6", color: "white",
+          fontSize: "0.78rem", fontWeight: 700,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          {selectedLaporan.nama.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
+        </div>
+        <div>
+          <div style={{ fontWeight: 600, color: "#1e293b", fontSize: "0.88rem" }}>
+            {selectedLaporan.nama}
+          </div>
+          <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>
+            {selectedLaporan.email}
+          </div>
+        </div>
+      </div>
+
+      {/* Detail info */}
+      {[
+        { label: "Jenis Laporan", value: selectedLaporan.jenis },
+        { label: "Tanggal",       value: selectedLaporan.tanggal },
+      ].map((item) => (
+        <div key={item.label} style={{
+          display: "flex", justifyContent: "space-between",
+          alignItems: "center", padding: "10px 0",
+          borderBottom: "1px solid #f1f5f9",
+        }}>
+          <span style={{ fontSize: "0.78rem", color: "#94a3b8" }}>{item.label}</span>
+          <span style={{ fontSize: "0.78rem", color: "#475569", fontWeight: 500 }}>{item.value}</span>
+        </div>
+      ))}
+
+      {/* Status — bisa diubah */}
+      <div style={{
+        display: "flex", justifyContent: "space-between",
+        alignItems: "center", padding: "10px 0",
+        borderBottom: "1px solid #f1f5f9",
+      }}>
+        <span style={{ fontSize: "0.78rem", color: "#94a3b8" }}>Status</span>
+        <select
+          value={selectedLaporan.status}
+          onChange={(e) => {
+            const statusBaru = e.target.value;
+            handleUbahStatus(selectedLaporan.id, statusBaru);
+            setSelectedLaporan({ ...selectedLaporan, status: statusBaru });
+          }}
+          style={{
+            padding: "4px 10px", borderRadius: 20,
+            border: "1px solid #e2e8f0",
+            fontSize: "0.75rem", fontWeight: 600,
+            color: selectedLaporan.status === "Pending" ? "#f97316" :
+                   selectedLaporan.status === "Selesai" ? "#22c55e" : "#ef4444",
+            background: selectedLaporan.status === "Pending" ? "#fff7ed" :
+                        selectedLaporan.status === "Selesai" ? "#f0fdf4" : "#fef2f2",
+            outline: "none", cursor: "pointer",
+          }}
+        >
+          <option value="Pending">Pending</option>
+          <option value="Selesai">Selesai</option>
+          <option value="Ditolak">Ditolak</option>
+        </select>
+      </div>
+
+      {/* Tombol */}
+      <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+        <button
+          onClick={() => setSelectedLaporan(null)}
+          style={{
+            flex: 1, padding: "10px", borderRadius: 10,
+            border: "1px solid #e2e8f0", background: "white",
+            color: "#64748b", fontSize: "0.85rem", cursor: "pointer",
+          }}
+        >
+          Tutup
+        </button>
+        <button
+          onClick={() => {
+            handleUbahStatus(selectedLaporan.id, "Selesai");
+            setSelectedLaporan(null);
+          }}
+          disabled={selectedLaporan.status === "Selesai"}
+          style={{
+            flex: 1, padding: "10px", borderRadius: 10,
+            border: "none",
+            background: selectedLaporan.status === "Selesai" ? "#94a3b8" : "#1e3a5f",
+            color: "white", fontSize: "0.85rem", fontWeight: 600,
+            cursor: selectedLaporan.status === "Selesai" ? "not-allowed" : "pointer",
+          }}
+        >
+          {selectedLaporan.status === "Selesai" ? "Sudah Selesai" : "Tandai Selesai"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       </main>
     </div>
   );

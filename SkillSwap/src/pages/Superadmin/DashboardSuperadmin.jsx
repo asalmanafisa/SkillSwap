@@ -12,32 +12,31 @@ import {
 
 // ── Data dummy chart ──────────────────────────────────────
 const statsData7Days = [
-  { day: "Sen", thisMonth: 300, lastMonth: 200 },
-  { day: "Sel", thisMonth: 450, lastMonth: 350 },
-  { day: "Rab", thisMonth: 380, lastMonth: 500 },
-  { day: "Kam", thisMonth: 600, lastMonth: 420 },
-  { day: "Jum", thisMonth: 520, lastMonth: 380 },
-  { day: "Sab", thisMonth: 700, lastMonth: 460 },
-  { day: "Min", thisMonth: 650, lastMonth: 550 },
+  { day: "Sen", thisMonth: 3, lastMonth: 2 },
+  { day: "Sel", thisMonth: 4, lastMonth: 3 },
+  { day: "Rab", thisMonth: 3, lastMonth: 5 },
+  { day: "Kam", thisMonth: 6, lastMonth: 4 },
+  { day: "Jum", thisMonth: 5, lastMonth: 3 },
+  { day: "Sab", thisMonth: 7, lastMonth: 4 },
+  { day: "Min", thisMonth: 6, lastMonth: 5 },
 ];
 
 const statsData30Days = [
-  { day: "1",  thisMonth: 200, lastMonth: 150 },
-  { day: "5",  thisMonth: 380, lastMonth: 300 },
-  { day: "10", thisMonth: 520, lastMonth: 420 },
-  { day: "15", thisMonth: 430, lastMonth: 500 },
-  { day: "20", thisMonth: 680, lastMonth: 380 },
-  { day: "25", thisMonth: 590, lastMonth: 460 },
-  { day: "30", thisMonth: 720, lastMonth: 550 },
+  { day: "1",  thisMonth: 2, lastMonth: 1 },
+  { day: "5",  thisMonth: 3, lastMonth: 3 },
+  { day: "10", thisMonth: 5, lastMonth: 4 },
+  { day: "15", thisMonth: 4, lastMonth: 5 },
+  { day: "20", thisMonth: 6, lastMonth: 3 },
+  { day: "25", thisMonth: 5, lastMonth: 4 },
+  { day: "30", thisMonth: 7, lastMonth: 5 },
 ];
 
 // ── Data dummy laporan ────────────────────────────────────
 const laporanMasuk = [
-  { id: 1, title: "Mengirim spam",         desc: "Dilaporkan oleh Amira Salma Nafisa ter...", color: "#ef4444" },
-  { id: 2, title: "Konten tidak pantas",   count: 14, desc: "Dilaporkan oleh Farah Naylul Fauzia",    color: "#f97316" },
-  { id: 3, title: "Penipuan skill",        desc: "Pengguna mengaku memiliki skill yang...",  color: "#ef4444" },
-  { id: 4, title: "Permintaan verifikasi", desc: "Diana Putri meminta verifikasi akun prof...", color: "#3b82f6" },
-  { id: 5, title: "Akun duplikat",         desc: "Terdeteksi 2 akun dengan email yang sa...", color: "#f97316" },
+  { id: 1, title: "Konten tidak pantas",         desc: "Dilaporkan oleh Amira Salma Nafisa", color: "#ef4444" },
+  { id: 2, title: "Spam atau penipuan skill", desc: "Dilaporkan oleh Farah Naylul Fauzia",    color: "#f97316" },
+  { id: 3, title: "Pelecehan atau bullying",        desc: "Dilaporkan oleh Yasmine Shavira Ahmad",  color: "#ef4444" },
+  { id: 4, title: "Akun palsu/duplikat", desc: "Dilaporkan oleh Tabina Naila Griselda", color: "#3b82f6" },
 ];
 
 export default function DashboardSuperadmin() {
@@ -73,8 +72,8 @@ export default function DashboardSuperadmin() {
               <span className="stat-label">Total Pengguna</span>
               <div className="stat-icon blue"><Users size={20} /></div>
             </div>
-            <div className="stat-value">5.284</div>
-            <div className="stat-change positive">▲ +12% bulan ini</div>
+            <div className="stat-value">5</div>
+            <div className="stat-change positive">▲ +2 bulan ini</div>
           </div>
 
           <div className="stat-card">
@@ -82,8 +81,8 @@ export default function DashboardSuperadmin() {
               <span className="stat-label">Sesi Aktif</span>
               <div className="stat-icon green"><Activity size={20} /></div>
             </div>
-            <div className="stat-value">1.047</div>
-            <div className="stat-change positive">▲ +8% minggu ini</div>
+            <div className="stat-value">4</div>
+            <div className="stat-change positive">▲ +2 minggu ini</div>
           </div>
 
           <div className="stat-card">
@@ -91,8 +90,8 @@ export default function DashboardSuperadmin() {
               <span className="stat-label">Laporan Masuk</span>
               <div className="stat-icon orange"><AlertTriangle size={20} /></div>
             </div>
-            <div className="stat-value">23</div>
-            <div className="stat-change negative">▼ +5 baru hari ini</div>
+            <div className="stat-value">4</div>
+            <div className="stat-change negative">▼ +2 minggu ini</div>
           </div>
 
           <div className="stat-card">
@@ -100,8 +99,8 @@ export default function DashboardSuperadmin() {
               <span className="stat-label">Pengguna Tersuspend</span>
               <div className="stat-icon red"><UserX size={20} /></div>
             </div>
-            <div className="stat-value">14</div>
-            <div className="stat-change negative">▼ +2 minggu ini</div>
+            <div className="stat-value">1</div>
+            <div className="stat-change negative">▼ +1 minggu ini</div>
           </div>
         </div>
 

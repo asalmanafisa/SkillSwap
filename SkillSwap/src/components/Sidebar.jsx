@@ -14,7 +14,7 @@ const menuItems = {
     { label: "Dashboard", icon: LayoutDashboard, path: "/superadmin/dashboard", key: "dashboard" },
     { label: "Kelola User", icon: Users, path: "/superadmin/kelola-user", key: "kelola-user" },
     { label: "Kelola Admin", icon: Shield, path: "/superadmin/kelola-admin", key: "kelola-admin" },
-    { label: "Laporan", icon: FileText, path: "/superadmin/laporan", key: "laporan", badge: 5 },
+    { label: "Laporan", icon: FileText, path: "/superadmin/laporan", key: "laporan"},
     { label: "Statistik", icon: BarChart2, path: "/superadmin/statistik", key: "statistik" },
   ],
   admin: [
