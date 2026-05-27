@@ -1,151 +1,200 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import heroBg from './images/hero-bg.jpg';
 
 const Register = () => {
   const [form, setForm] = useState({
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
     location: '',
     skills: '',
   });
   const [remember, setRemember] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Fraunces:wght@400;700&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    if (e.target.name === 'password') validatePassword(e.target.value);
+    if (e.target.name === 'confirmPassword') validateConfirm(e.target.value);
+  };
+
+  const validatePassword = (pass) => {
+    if (pass.length < 8) {
+      setPasswordError('Password minimal 8 karakter');
+    } else if (!/[A-Z]/.test(pass)) {
+      setPasswordError('Password harus mengandung minimal 1 huruf besar');
+    } else if (!/[0-9]/.test(pass)) {
+      setPasswordError('Password harus mengandung minimal 1 angka');
+    } else {
+      setPasswordError('');
+    }
+  };
+
+  const validateConfirm = (confirm) => {
+    if (confirm && confirm !== form.password) {
+      setPasswordError('Konfirmasi password tidak cocok');
+    } else if (form.password.length >= 8 && /[A-Z]/.test(form.password) && /[0-9]/.test(form.password)) {
+      setPasswordError('');
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (passwordError) {
+      alert('Periksa kembali password Anda');
+      return;
+    }
     console.log('Register:', { ...form, remember });
-    // nanti hubungkan ke API
   };
 
   return (
-    <div className="bg-[#fcf5e8] font-sans min-h-screen flex">
-      {/* Kolom kiri - form registrasi */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12">
-        <div className="max-w-md w-full">
-          <div className="mb-6">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#234c6a] rounded-lg flex items-center justify-center text-white font-bold text-sm">S</div>
-              <span className="font-extrabold text-[#234c6a] text-xl">SkillSwap</span>
-            </Link>
+    <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Poppins', sans-serif", backgroundColor: '#fcf5e8' }}>
+      <div className="flex flex-1">
+        {/* Kolom kiri - form registrasi */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12">
+          <div className="max-w-md w-full">
+            <div className="mb-6">
+              <Link to="/" className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-[#234c6a] rounded-lg flex items-center justify-center text-white font-bold text-sm">S</div>
+                <span className="font-extrabold text-[#234c6a] text-xl">SkillSwap</span>
+              </Link>
+            </div>
+            <h2 className="font-serif text-3xl font-bold text-gray-800">Daftar</h2>
+            <p className="text-gray-500 text-sm mt-2 mb-6">Mulai perjalanan belajarmu bersama kami</p>
+
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Nama</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a] text-sm"
+                  placeholder="Nama lengkap"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a] text-sm"
+                  placeholder="email@example.com"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a] text-sm"
+                  placeholder="Min. 8 karakter, huruf besar & angka"
+                  required
+                />
+                {passwordError && (
+                  <p className="text-[10px] text-red-500 mt-1">{passwordError}</p>
+                )}
+                <p className="text-[10px] text-gray-400 mt-1">* Password: huruf besar, angka, minimal 8 karakter</p>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Konfirmasi Password</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a] text-sm"
+                  placeholder="Ulangi password"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Lokasi (opsional)</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={form.location}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a] text-sm"
+                  placeholder="Kota, Negara"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Skill yang Anda tawarkan</label>
+                <textarea
+                  name="skills"
+                  value={form.skills}
+                  onChange={handleChange}
+                  rows="2"
+                  className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a] text-sm"
+                  placeholder="UI design, SEO, Photography"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">Pisahkan dengan koma</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="rounded border-gray-300 text-[#234c6a] focus:ring-[#234c6a]"
+                />
+                <label className="text-xs text-gray-600">Ingat saya</label>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-[#234c6a] text-white py-2 rounded-lg font-semibold text-sm hover:bg-[#1a3d55] transition flex items-center justify-center gap-2"
+              >
+                Daftar <span>→</span>
+              </button>
+            </form>
+
+            <p className="text-center text-xs text-gray-500 mt-6">
+              Sudah punya akun?{' '}
+              <Link to="/login" className="text-[#234c6a] font-semibold hover:underline">Masuk di sini</Link>
+            </p>
           </div>
+        </div>
 
-          <h2 className="font-serif text-3xl font-bold text-gray-800">Registrasi</h2>
-          <p className="text-gray-500 mt-2 mb-6">Mulai perjalanan belajarmu bersama kami</p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a]"
-                placeholder="edo riando"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a]"
-                placeholder="fafa@gmail.com"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a]"
-                placeholder="********"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Lokasi</label>
-              <input
-                type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a]"
-                placeholder="Depok, Indonesia"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Skill yang anda tawarkan</label>
-              <textarea
-                name="skills"
-                value={form.skills}
-                onChange={handleChange}
-                rows="2"
-                className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a]"
-                placeholder="UI design, SEO, Photography"
-              />
-              <p className="text-xs text-gray-400 mt-1">Pisahkan dengan koma</p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="rounded border-gray-300 text-[#234c6a] focus:ring-[#234c6a]"
-              />
-              <label className="text-sm text-gray-600">Ingat saya</label>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-[#234c6a] text-white py-2 rounded-lg font-semibold hover:bg-[#1a3d55] transition flex items-center justify-center gap-2"
-            >
-              Daftar <span>→</span>
-            </button>
-          </form>
-
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Sudah punya akun?{' '}
-            <Link to="/login" className="text-[#234c6a] font-semibold hover:underline">Masuk di sini</Link>
-          </p>
-
-          <div className="text-center text-xs text-gray-400 mt-8">
-            © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
+        {/* Kolom kanan - branding dengan gambar background opacity 10% */}
+        <div className="hidden lg:flex lg:w-1/2 bg-[#234c6a] text-white flex-col items-center justify-center px-12 relative overflow-hidden">
+          <img 
+            src={heroBg} 
+            alt="Background" 
+            className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none"
+          />
+          <div className="absolute right-0 top-0 w-64 h-64 bg-[#f5c842]/10 rounded-full blur-3xl"></div>
+          <div className="absolute left-0 bottom-0 w-72 h-72 bg-[#f5c842]/5 rounded-full blur-3xl"></div>
+          <div className="relative z-10 max-w-md text-center">
+            <h1 className="font-serif text-4xl font-bold leading-tight">Selamat Datang di SkillSwap</h1>
+            <p className="text-white/80 mt-4 text-base">
+              Platform bertukar keahlian terbaik. Temukan partner yang tepat, bagikan skill Anda, dan berkembang bersama komunitas kami.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Kolom kanan - statistik (sama seperti login) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#234c6a] text-white flex-col justify-center px-12 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-64 h-64 bg-[#f5c842]/10 rounded-full blur-3xl"></div>
-        <div className="relative z-10 max-w-md">
-          <h1 className="font-serif text-4xl font-bold leading-tight">Selamat Datang di SkillSwap</h1>
-          <p className="text-white/80 mt-4 text-lg">
-            Platform bertukar keahlian terbaik. Temukan partner yang tepat, bagikan skill Anda, dan berkembang bersama komunitas kami.
-          </p>
-          <div className="flex gap-8 mt-8">
-            <div>
-              <div className="text-3xl font-bold">5K+</div>
-              <div className="text-white/60 text-sm">Pengguna Aktif</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold">10K+</div>
-              <div className="text-white/60 text-sm">Sesi Diskusi</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Footer full width di paling bawah */}
+      <footer className="bg-[#234c6a] text-white/80 py-3 text-center text-[11px] w-full">
+        © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
+      </footer>
     </div>
   );
 };

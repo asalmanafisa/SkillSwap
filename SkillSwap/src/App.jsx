@@ -7,12 +7,16 @@ import ResetPassword from './pages/User/ResetPassword';
 // Halaman user setelah login
 import Beranda from './pages/User/Beranda';
 import Tentang from './pages/User/Tentang';
-import ManajemenSkill from './pages/User/ManajemenSkill';
+import Temukan from './pages/User/Temukan';
 import Notifikasi from './pages/User/Notifikasi';
 import Profil from './pages/User/Profil';
 import Chat from './pages/User/Chat';
 import Pengaturan from './pages/User/Pengaturan';
 import Laporan from './pages/User/Laporan';
+import Partners from './pages/User/Partners';
+import Sessions from './pages/User/Sessions';
+import RatingSaya from './pages/User/RatingSaya';
+
 
 function App() {
   return (
@@ -26,13 +30,18 @@ function App() {
         {/* User routes */}
         <Route path="/beranda" element={<Beranda />} />
         <Route path="/tentang" element={<Tentang />} />
-        <Route path="/temukan" element={<ManajemenSkill />} />
+        <Route path="/temukan" element={<Temukan/>} />
         <Route path="/notifikasi" element={<Notifikasi />} />
         <Route path="/profil" element={<Profil />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/chat/:userId" element={<Chat />} />
         <Route path="/profil/:userId" element={<Profil />} />
         <Route path="/pengaturan" element={<Pengaturan/>}/>
         <Route path="/laporan/:userId" element={<Laporan/>}/>
+        <Route path="/partners" element={<Partners />} />
+        <Route path="/sessions" element={<Sessions />} />
+        <Route path="/rating-saya" element={<RatingSaya />} />
+
       </Routes>
     </BrowserRouter>
   );
