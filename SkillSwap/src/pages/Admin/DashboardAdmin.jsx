@@ -23,8 +23,8 @@ const daftarPengguna = [
 ];
 
 const statCards = [
-  { label: "Total Pengguna",      value: "5.284", sub: "+12% bulan ini",   subColor: "#22c55e", iconEl: "users",    iconBg: "#eff6ff", iconColor: "#3b82f6" },
-  { label: "Sesi Aktif",          value: "1.047", sub: "+8% minggu ini",   subColor: "#22c55e", iconEl: "activity", iconBg: "#f0fdf4", iconColor: "#22c55e" },
+  { label: "Total Pengguna",      value: "5", sub: "+1 bulan ini",   subColor: "#22c55e", iconEl: "users",    iconBg: "#eff6ff", iconColor: "#3b82f6" },
+  { label: "Sesi Aktif",          value: "4", sub: "+2 minggu ini",   subColor: "#22c55e", iconEl: "activity", iconBg: "#f0fdf4", iconColor: "#22c55e" },
   { label: "Laporan Masuk",       value: "4",    sub: "+2 minggu ini", subColor: "#ef4444", iconEl: "alert",    iconBg: "#fff7ed", iconColor: "#f97316" },
   { label: "Pengguna Tersuspend", value: "1",    sub: "+1 minggu ini",    subColor: "#ef4444", iconEl: "userx",    iconBg: "#fef2f2", iconColor: "#ef4444" },
 ];

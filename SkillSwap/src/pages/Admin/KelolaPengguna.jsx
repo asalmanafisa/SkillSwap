@@ -247,10 +247,10 @@ export default function KelolaPengguna() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}>
           {[
-            { label: "Total Pengguna",    value: penggunaList.length.toString(), change: "+4.5%", changeColor: "#22c55e", icon: "👥" },
-            { label: "Pengguna Aktif",    value: penggunaList.filter(u => u.status === "Aktif").length.toString(), change: "92%",   changeColor: "#22c55e", icon: "🛡️" },
-            { label: "Pengguna Baru",     value: "1",   change: "+12%",  changeColor: "#22c55e", icon: "👤" },
-            { label: "Pengguna Tersuspend", value: penggunaList.filter(u => u.status === "Tersuspend").length.toString(),    change: "-2%",   changeColor: "#ef4444", icon: "🚫" },
+            { label: "Total Pengguna",    value: penggunaList.length.toString(), change: "+1", changeColor: "#22c55e", icon: "👥" },
+            { label: "Pengguna Aktif",    value: penggunaList.filter(u => u.status === "Aktif").length.toString(), change: "+2",   changeColor: "#22c55e", icon: "🛡️" },
+            { label: "Pengguna Baru",     value: "1",   change: "+1",  changeColor: "#22c55e", icon: "👤" },
+            { label: "Pengguna Tersuspend", value: penggunaList.filter(u => u.status === "Tersuspend").length.toString(),    change: "+1",   changeColor: "#ef4444", icon: "🚫" },
           ].map((c) => (
             <div key={c.label} style={{ background: "white", borderRadius: 14, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
