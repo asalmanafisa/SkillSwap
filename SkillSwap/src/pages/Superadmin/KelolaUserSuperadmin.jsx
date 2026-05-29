@@ -227,8 +227,8 @@ export default function KelolaUser() {
         {/* Stat Cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}>
           {[
-            { label: "Total Pengguna", value: users.length.toString(), sub: "▲ +12% bulan ini", subColor: "#22c55e" },
-            { label: "Sesi Aktif", value: users.filter(u => u.status === "Aktif").length.toString(), sub: "▲ +8% minggu ini", subColor: "#22c55e" },
+            { label: "Total Pengguna", value: users.length.toString(), sub: "▲ +2 bulan ini", subColor: "#22c55e" },
+            { label: "Sesi Aktif", value: users.filter(u => u.status === "Aktif").length.toString(), sub: "▲ +2 minggu ini", subColor: "#22c55e" },
             { label: "Laporan Masuk", value: "4", sub: "▼ +2 minggu ini", subColor: "#ef4444" },
             { label: "Pengguna Tersuspend", value: users.filter(u => u.status === "Tersuspend").length.toString(), sub: "▼ +1 minggu ini", subColor: "#ef4444" },
           ].map((c) => (

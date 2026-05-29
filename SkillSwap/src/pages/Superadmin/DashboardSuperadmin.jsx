@@ -58,7 +58,7 @@ export default function DashboardSuperadmin() {
         <div className="dashboard-header">
           <div>
             <h1 className="dashboard-title">Dashboard Superadmin</h1>
-            <p className="dashboard-subtitle">Periode: April 2026</p>
+            <p className="dashboard-subtitle">Periode: Juni 2026</p>
           </div>
           <button className="period-btn" onClick={() => navigate("/superadmin/statistik")}>
             Bulan Ini <ChevronDown size={16} />
