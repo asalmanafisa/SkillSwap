@@ -1,32 +1,35 @@
 // src/pages/Admin/DashboardAdmin.jsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  LayoutDashboard, Users, FileText,
-  LogOut, Activity,
-  AlertTriangle, UserX,
+import { 
+  LayoutDashboard, 
+  Users, 
+  FileText, 
+  LogOut, 
+  Activity, 
+  AlertTriangle, 
+  UserX 
 } from "lucide-react";
 
 const laporanMasuk = [
-  { id: 1, title: "Konten tidak pantas",         desc: "Dilaporkan oleh Amira Salma Nafisa", color: "#ef4444" },
+  { id: 1, title: "Konten tidak pantas", desc: "Dilaporkan oleh Amira Salma Nafisa", color: "#ef4444" },
   { id: 2, title: "Spam atau penipuan skill", desc: "Dilaporkan oleh Farah Naylul Fauzia", color: "#f97316" },
-  { id: 3, title: "Pelecehan atau bullying",        desc: "Dilaporkan oleh Yasmine Shavira Ahmad",   color: "#ef4444" },
-  { id: 4, title: "Akun palsu/duplikat",   desc: "Dilaporkan oleh Tabina Naila Griselda", color: "#22c55e" },
+  { id: 3, title: "Pelecehan atau bullying", desc: "Dilaporkan oleh Yasmine Shavira Ahmad", color: "#ef4444" },
+  { id: 4, title: "Akun palsu/duplikat", desc: "Dilaporkan oleh Tabina Naila Griselda", color: "#22c55e" },
 ];
 
 const daftarPengguna = [
-  { id: 1, nama: "Farah Naylul Fauzia",   role: "Desainer · Surabaya",        avatar: "FN", warna: "#f97316", status: "Aktif"   },
-  { id: 2, nama: "Yasmine Shavira Ahmad", role: "Programmer · Malang",         avatar: "YS", warna: "#22c55e", status: "Aktif"   },
-  { id: 3, nama: "Tabina Naila Griselda", role: "Data Analyst · Surabaya",     avatar: "TN", warna: "#8b5cf6", status: "Aktif"   },
-  { id: 4, nama: "Sekar Suryawati",       role: "Digital Marketing · Jakarta", avatar: "SS", warna: "#14b8a6", status: "Suspended" },
+  { id: 1, nama: "Farah Naylul Fauzia", role: "Desainer · Surabaya", avatar: "FN", warna: "#f97316", status: "Aktif" },
+  { id: 2, nama: "Yasmine Shavira Ahmad", role: "Programmer · Malang", avatar: "YS", warna: "#22c55e", status: "Aktif" },
+  { id: 3, nama: "Tabina Naila Griselda", role: "Data Analyst · Surabaya", avatar: "TN", warna: "#8b5cf6", status: "Aktif" },
+  { id: 4, nama: "Sekar Suryawati", role: "Digital Marketing · Jakarta", avatar: "SS", warna: "#14b8a6", status: "Suspended" },
 ];
 
 const statCards = [
-  { label: "Total Pengguna",      value: "5", sub: "+1 bulan ini",   subColor: "#22c55e", iconEl: "users",    iconBg: "#eff6ff", iconColor: "#3b82f6" },
-  { label: "Sesi Aktif",          value: "4", sub: "+2 minggu ini",   subColor: "#22c55e", iconEl: "activity", iconBg: "#f0fdf4", iconColor: "#22c55e" },
-  { label: "Laporan Masuk",       value: "4",    sub: "+2 minggu ini", subColor: "#ef4444", iconEl: "alert",    iconBg: "#fff7ed", iconColor: "#f97316" },
-  { label: "Pengguna Tersuspend", value: "1",    sub: "+1 minggu ini",    subColor: "#ef4444", iconEl: "userx",    iconBg: "#fef2f2", iconColor: "#ef4444" },
+  { label: "Total Pengguna", value: "5", sub: "+1 bulan ini", subColor: "#22c55e", icon: <Users size={20} />, iconBg: "#eff6ff", iconColor: "#3b82f6" },
+  { label: "Sesi Aktif", value: "4", sub: "+2 minggu ini", subColor: "#22c55e", icon: <Activity size={20} />, iconBg: "#f0fdf4", iconColor: "#22c55e" },
+  { label: "Laporan Masuk", value: "4", sub: "+2 minggu ini", subColor: "#ef4444", icon: <AlertTriangle size={20} />, iconBg: "#fff7ed", iconColor: "#f97316" },
+  { label: "Pengguna Tersuspend", value: "1", sub: "+1 minggu ini", subColor: "#ef4444", icon: <UserX size={20} />, iconBg: "#fef2f2", iconColor: "#ef4444" },
 ];
 
 function SidebarAdmin({ active }) {
@@ -34,9 +37,9 @@ function SidebarAdmin({ active }) {
   const [showLogout, setShowLogout] = useState(false);
 
   const menus = [
-    { key: "dashboard",       label: "Dashboard",       icon: LayoutDashboard, path: "/admin/dashboard"       },
-    { key: "kelola-pengguna", label: "Kelola Pengguna", icon: Users,           path: "/admin/kelola-pengguna" },
-    { key: "kelola-laporan",  label: "Kelola Laporan",  icon: FileText,        path: "/admin/kelola-laporan"  },
+    { key: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={16} />, path: "/admin/dashboard" },
+    { key: "kelola-pengguna", label: "Kelola Pengguna", icon: <Users size={16} />, path: "/admin/kelola-pengguna" },
+    { key: "kelola-laporan", label: "Kelola Laporan", icon: <FileText size={16} />, path: "/admin/kelola-laporan" },
   ];
 
   return (
@@ -64,7 +67,6 @@ function SidebarAdmin({ active }) {
         </div>
         <ul style={{ listStyle: "none", padding: 0, margin: "0 0 20px" }}>
           {menus.map((item) => {
-            const Icon = item.icon;
             const isActive = active === item.key;
             return (
               <li key={item.key}>
@@ -80,7 +82,7 @@ function SidebarAdmin({ active }) {
                     transition: "all 0.15s", textAlign: "left",
                   }}
                 >
-                  <Icon size={16} />
+                  {item.icon}
                   {item.label}
                 </button>
               </li>
@@ -92,7 +94,6 @@ function SidebarAdmin({ active }) {
           LAINNYA
         </div>
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-          
           <li>
             <button
               onClick={() => setShowLogout(true)}
@@ -188,10 +189,7 @@ export default function DashboardAdmin() {
                   background: c.iconBg, color: c.iconColor,
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  {c.iconEl === "users"    && <Users size={20} />}
-                  {c.iconEl === "activity" && <Activity size={20} />}
-                  {c.iconEl === "alert"    && <AlertTriangle size={20} />}
-                  {c.iconEl === "userx"    && <UserX size={20} />}
+                  {c.icon}
                 </div>
               </div>
               <div style={{ fontSize: "1.4rem", fontWeight: 700, color: "#1e293b", lineHeight: 1 }}>{c.value}</div>
@@ -224,11 +222,6 @@ export default function DashboardAdmin() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "#1e293b", display: "flex", alignItems: "center", gap: 6 }}>
                       {item.title}
-                      {item.count && (
-                        <span style={{ background: "#f1f5f9", color: "#64748b", fontSize: "0.7rem", padding: "1px 6px", borderRadius: 20 }}>
-                          {item.count}
-                        </span>
-                      )}
                     </div>
                     <div style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {item.desc}
@@ -286,17 +279,17 @@ export default function DashboardAdmin() {
                 </div>
                 <div>
                   <button
-        onClick={() => { setSelectedUser(user); setShowSuspend(true); }}
-        style={{
-        padding: "4px 12px", borderRadius: 6,
-        border: user.status === "Aktif" ? "1px solid #fecaca" : "1px solid #fed7aa",
-        background: user.status === "Aktif" ? "#fef2f2" : "#fff7ed",
-        color: user.status === "Aktif" ? "#ef4444" : "#f97316",
-        fontSize: "0.72rem", fontWeight: 600, cursor: "pointer",
-        }}
-      >
-        {user.status === "Aktif" ? "Suspend" : "Tinjau"}
-      </button>
+                    onClick={() => { setSelectedUser(user); setShowSuspend(true); }}
+                    style={{
+                      padding: "4px 12px", borderRadius: 6,
+                      border: user.status === "Aktif" ? "1px solid #fecaca" : "1px solid #fed7aa",
+                      background: user.status === "Aktif" ? "#fef2f2" : "#fff7ed",
+                      color: user.status === "Aktif" ? "#ef4444" : "#f97316",
+                      fontSize: "0.72rem", fontWeight: 600, cursor: "pointer",
+                    }}
+                  >
+                    {user.status === "Aktif" ? "Suspend" : "Tinjau"}
+                  </button>
                 </div>
               </div>
             ))}
@@ -307,78 +300,78 @@ export default function DashboardAdmin() {
         <div style={{ textAlign: "center", marginTop: 28, fontSize: "0.72rem", color: "#94a3b8", paddingBottom: 16 }}>
           © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
         </div>
+
         {/* Popup Konfirmasi Suspend */}
-{showSuspend && selectedUser && (
-  <div style={{
-    position: "fixed", inset: 0,
-    background: "rgba(0,0,0,0.35)",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    zIndex: 1000,
-  }}>
-    <div style={{
-      background: "white", borderRadius: 16,
-      padding: "28px 24px", width: 340,
-      boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-      textAlign: "center",
-    }}>
-      {/* Icon */}
-      <div style={{
-        width: 52, height: 52, borderRadius: "50%",
-        background: "#fff7ed", fontSize: "1.4rem",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        margin: "0 auto 16px",
-      }}>⚠️</div>
+        {showSuspend && selectedUser && (
+          <div style={{
+            position: "fixed", inset: 0,
+            background: "rgba(0,0,0,0.35)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 1000,
+          }}>
+            <div style={{
+              background: "white", borderRadius: 16,
+              padding: "28px 24px", width: 340,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+              textAlign: "center",
+            }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: "50%",
+                background: "#fff7ed", fontSize: "1.4rem",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 auto 16px",
+              }}>⚠️</div>
 
-      <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#0f172a", margin: "0 0 8px" }}>
-        {selectedUser.status === "Aktif" ? "Suspend Pengguna?" : "Aktifkan Pengguna?"}
-      </h3>
-      <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "0 0 6px", lineHeight: 1.5 }}>
-       {selectedUser.status === "Aktif"
-         ? "Apakah anda yakin ingin mensuspend"
-         : "Apakah anda yakin ingin mengaktifkan kembali"}
-      </p>
-      <p style={{ fontSize: "0.88rem", fontWeight: 700, color: "#1e293b", margin: "0 0 20px" }}>
-        {selectedUser.nama}?
-      </p>
+              <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#0f172a", margin: "0 0 8px" }}>
+                {selectedUser.status === "Aktif" ? "Suspend Pengguna?" : "Aktifkan Pengguna?"}
+              </h3>
+              <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "0 0 6px", lineHeight: 1.5 }}>
+                {selectedUser.status === "Aktif"
+                  ? "Apakah anda yakin ingin mensuspend"
+                  : "Apakah anda yakin ingin mengaktifkan kembali"}
+              </p>
+              <p style={{ fontSize: "0.88rem", fontWeight: 700, color: "#1e293b", margin: "0 0 20px" }}>
+                {selectedUser.nama}?
+              </p>
 
-      <div style={{ display: "flex", gap: 10 }}>
-        <button
-          onClick={() => { setShowSuspend(false); setSelectedUser(null); }}
-          style={{
-            flex: 1, padding: "10px", borderRadius: 10,
-            border: "1px solid #e2e8f0", background: "white",
-            color: "#64748b", fontSize: "0.85rem",
-            fontWeight: 500, cursor: "pointer",
-          }}
-        >
-          Batal
-        </button>
-        <button
-        onClick={() => {
-          setPenggunaList((prev) =>
-            prev.map((u) =>
-              u.id === selectedUser.id
-               ? { ...u, status: u.status === "Aktif" ? "Suspended" : "Aktif" }
-               : u
-              )
-          );
-            setShowSuspend(false);
-         setSelectedUser(null);
-       }}
-        style={{
-          flex: 1, padding: "10px", borderRadius: 10,
-          border: "none",
-          background: selectedUser.status === "Aktif" ? "#ef4444" : "#22c55e",
-           color: "white", fontSize: "0.85rem",
-         fontWeight: 600, cursor: "pointer",
-        }}
-      >
-       {selectedUser.status === "Aktif" ? "Ya, Suspend" : "Ya, Aktifkan"}
-      </button>
-      </div>
-    </div>
-  </div>
-)}
+              <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  onClick={() => { setShowSuspend(false); setSelectedUser(null); }}
+                  style={{
+                    flex: 1, padding: "10px", borderRadius: 10,
+                    border: "1px solid #e2e8f0", background: "white",
+                    color: "#64748b", fontSize: "0.85rem",
+                    fontWeight: 500, cursor: "pointer",
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => {
+                    setPenggunaList((prev) =>
+                      prev.map((u) =>
+                        u.id === selectedUser.id
+                          ? { ...u, status: u.status === "Aktif" ? "Suspended" : "Aktif" }
+                          : u
+                      )
+                    );
+                    setShowSuspend(false);
+                    setSelectedUser(null);
+                  }}
+                  style={{
+                    flex: 1, padding: "10px", borderRadius: 10,
+                    border: "none",
+                    background: selectedUser.status === "Aktif" ? "#ef4444" : "#22c55e",
+                    color: "white", fontSize: "0.85rem",
+                    fontWeight: 600, cursor: "pointer",
+                  }}
+                >
+                  {selectedUser.status === "Aktif" ? "Ya, Suspend" : "Ya, Aktifkan"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

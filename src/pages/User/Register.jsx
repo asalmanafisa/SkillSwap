@@ -1,8 +1,10 @@
-import { Link } from 'react-router-dom';
+// src/pages/User/Register.jsx
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import heroBg from './images/hero-bg.jpg';
 
 const Register = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -53,7 +55,32 @@ const Register = () => {
       alert('Periksa kembali password Anda');
       return;
     }
+    
+    // Role FIX: selalu 'user' (tidak bisa pilih admin/superadmin)
+    const newUser = {
+      id: Date.now(),
+      name: form.name,
+      email: form.email,
+      location: form.location,
+      skills: form.skills,
+      role: 'user'
+    };
+    
     console.log('Register:', { ...form, remember });
+    
+    // Simpan ke localStorage
+    if (remember) {
+      localStorage.setItem('user', JSON.stringify(newUser));
+      localStorage.setItem('role', 'user');
+      localStorage.setItem('token', 'dummy-token-' + Date.now());
+    } else {
+      sessionStorage.setItem('user', JSON.stringify(newUser));
+      sessionStorage.setItem('role', 'user');
+      sessionStorage.setItem('token', 'dummy-token-' + Date.now());
+    }
+    
+    // Redirect ke beranda user
+    navigate('/beranda');
   };
 
   return (
@@ -173,7 +200,7 @@ const Register = () => {
           </div>
         </div>
 
-        {/* Kolom kanan - branding dengan gambar background opacity 10% */}
+        {/* Kolom kanan - branding */}
         <div className="hidden lg:flex lg:w-1/2 bg-[#234c6a] text-white flex-col items-center justify-center px-12 relative overflow-hidden">
           <img 
             src={heroBg} 
@@ -191,7 +218,6 @@ const Register = () => {
         </div>
       </div>
 
-      {/* Footer full width di paling bawah */}
       <footer className="bg-[#234c6a] text-white/80 py-3 text-center text-[11px] w-full">
         © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
       </footer>

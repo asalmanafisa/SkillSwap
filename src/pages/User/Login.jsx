@@ -1,3 +1,4 @@
+// src/pages/User/Login.jsx
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import heroBg from './images/hero-bg.jpg';  
@@ -17,34 +18,65 @@ const Login = () => {
     document.head.appendChild(link);
   }, []);
 
+  // Data user (dummy) - user, admin, superadmin
   const dummyUsers = [
-    { id: 1, email: 'yasmine@gmail.com', password: '123456', name: 'User Example' },
-    { id: 2, email: 'amira@gmail', password: 'test123', name: 'Test User' },
+    // User biasa (bisa register)
+    { id: 1, email: 'yasmine@gmail.com', password: '123456', name: 'Yasmine Shavira', role: 'user' },
+    { id: 2, email: 'amira@gmail.com', password: 'test123', name: 'Amira Salma', role: 'user' },
+    // Admin (dibuat oleh superadmin)
+    { id: 3, email: 'admin@skillswap.com', password: 'admin123', name: 'Admin SkillSwap', role: 'admin' },
+    // Superadmin (dibuat manual di database)
+    { id: 4, email: 'superadmin@skillswap.com', password: 'super123', name: 'Superadmin', role: 'superadmin' },
   ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
+    
+    // Cari user berdasarkan email
     const user = dummyUsers.find((u) => u.email === email);
+    
     if (!user) {
       setError('Email belum terdaftar. Silakan daftar terlebih dahulu.');
       return;
     }
+    
     if (user.password !== password) {
       setError('Password salah. Coba lagi.');
       return;
     }
+    
+    // Data user yang akan disimpan
+    const userData = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    };
+    
+    // Simpan sesuai pilihan "Ingat saya"
     if (remember) {
-      localStorage.setItem('user', JSON.stringify({ id: user.id, email: user.email, name: user.name }));
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('role', user.role);
+      localStorage.setItem('token', 'dummy-token-' + Date.now());
     } else {
-      sessionStorage.setItem('user', JSON.stringify({ id: user.id, email: user.email, name: user.name }));
+      sessionStorage.setItem('user', JSON.stringify(userData));
+      sessionStorage.setItem('role', user.role);
+      sessionStorage.setItem('token', 'dummy-token-' + Date.now());
     }
-    navigate('/beranda');
+    
+    // Redirect berdasarkan role
+    if (user.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (user.role === 'superadmin') {
+      navigate('/superadmin/dashboard');
+    } else {
+      navigate('/beranda');
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Poppins', sans-serif", backgroundColor: '#fcf5e8' }}>
-      {/* Konten utama dua kolom */}
       <div className="flex flex-1">
         {/* Kolom kiri - form login */}
         <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12">
@@ -131,10 +163,12 @@ const Login = () => {
               Belum punya akun?{' '}
               <Link to="/register" className="text-[#234c6a] font-semibold hover:underline">Daftar sekarang</Link>
             </p>
+            
+            
           </div>
         </div>
 
-        {/* Kolom kanan - branding dengan gambar background opacity 10% */}
+        {/* Kolom kanan - branding */}
         <div className="hidden lg:flex lg:w-1/2 bg-[#234c6a] text-white flex-col items-center justify-center px-12 relative overflow-hidden">
           <img 
             src={heroBg} 
@@ -152,7 +186,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Footer full width di paling bawah */}
       <footer className="bg-[#234c6a] text-white/80 py-3 text-center text-[11px] w-full">
         © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
       </footer>
