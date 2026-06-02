@@ -1,11 +1,87 @@
+// src/pages/Superadmin/KelolaUserSuperadmin.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import {
-  Filter, Download, Plus, Search, Star,
-  ChevronLeft, ChevronRight, Edit, Trash2, Ban,
-  X, UserCheck, AlertTriangle
+  Filter, Download, Search, Star,
+  ChevronLeft, ChevronRight, Ban, X,
+  UserCheck, AlertTriangle, CheckCircle, Edit2
 } from "lucide-react";
+
+// ── Modal Notifikasi ──────────────────────────────────────
+function NotificationModal({ message, type, onClose }) {
+  return (
+    <div style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.5)",
+      backdropFilter: "blur(4px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 2000,
+    }}>
+      <div style={{
+        background: "white",
+        borderRadius: 20,
+        padding: "28px 32px",
+        width: 360,
+        maxWidth: "90%",
+        textAlign: "center",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+      }}>
+        <div style={{
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          background: type === "success" ? "#dcfce7" : "#fee2e2",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 16px",
+        }}>
+          {type === "success" ? (
+            <CheckCircle size={28} color="#22c55e" />
+          ) : (
+            <AlertTriangle size={28} color="#ef4444" />
+          )}
+        </div>
+        <h3 style={{
+          fontSize: "1.1rem",
+          fontWeight: 700,
+          color: "#1e293b",
+          margin: "0 0 8px",
+        }}>
+          {type === "success" ? "Berhasil!" : "Perhatian"}
+        </h3>
+        <p style={{
+          fontSize: "0.85rem",
+          color: "#64748b",
+          margin: "0 0 24px",
+          lineHeight: 1.5,
+        }}>
+          {message}
+        </p>
+        <button
+          onClick={onClose}
+          style={{
+            padding: "10px 24px",
+            borderRadius: 12,
+            border: "none",
+            background: "#1e3a5f",
+            color: "white",
+            fontSize: "0.85rem",
+            fontWeight: 600,
+            cursor: "pointer",
+            width: "100%",
+          }}
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // ── Data dummy pengguna ───────────────────────────────────
 const dummyUsers = [
@@ -41,8 +117,6 @@ const dummyUsers = [
   },
 ];
 
-const STATUS_TABS = ["Semua", "Aktif", "Tersuspend", "Tidak Aktif"];
-
 const skillColors = {
   "UI/UX":       { bg: "#ede9fe", text: "#7c3aed" },
   "Figma":       { bg: "#fce7f3", text: "#db2777" },
@@ -55,6 +129,7 @@ const skillColors = {
   "SEO":         { bg: "#f0fdf4", text: "#15803d" },
   "Android":     { bg: "#f0fdf4", text: "#15803d" },
   "Kotlin":      { bg: "#ede9fe", text: "#7c3aed" },
+  "Graphic Design": { bg: "#fce7f3", text: "#db2777" },
   "+1":          { bg: "#f1f5f9", text: "#64748b" },
 };
 
@@ -62,9 +137,8 @@ function StatusBadge({ status }) {
   const map = {
     "Aktif":      { bg: "#f0fdf4", color: "#22c55e", dot: "#22c55e" },
     "Tersuspend": { bg: "#fef2f2", color: "#ef4444", dot: "#ef4444" },
-    "Tidak Aktif":{ bg: "#f1f5f9", color: "#94a3b8", dot: "#94a3b8" },
   };
-  const s = map[status] || map["Tidak Aktif"];
+  const s = map[status] || map["Aktif"];
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 5,
@@ -78,123 +152,91 @@ function StatusBadge({ status }) {
   );
 }
 
-export default function KelolaUser() {
+export default function KelolaUserSuperadmin() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab]     = useState("Semua");
-  const [search, setSearch]           = useState("");
-  const [selected, setSelected]       = useState([]);
+  const [filterStatus, setFilterStatus] = useState("Semua");
+  const [filterDate, setFilterDate] = useState("Semua");
+  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [showFilter, setShowFilter]   = useState(false);
-  const [showTambah, setShowTambah]   = useState(false);
-  const [showEdit, setShowEdit]       = useState(null);
+  const [showFilter, setShowFilter] = useState(false);
   const [showSuspend, setShowSuspend] = useState(null);
-  const [showDelete, setShowDelete]   = useState(null);
-  const [users, setUsers]             = useState(dummyUsers);
+  const [showDelete, setShowDelete] = useState(null);
+  const [notification, setNotification] = useState(null);
+  const [users, setUsers] = useState(dummyUsers);
 
-  // Form states
-  const [editForm, setEditForm] = useState({
-    nama: "", email: "", skills: "", status: "Aktif", bio: ""
-  });
-  const [tambahForm, setTambahForm] = useState({
-    nama: "", email: "", skills: "", status: "Aktif", bio: ""
-  });
+  // Fungsi untuk cek apakah user bergabung bulan ini
+  const isNewThisMonth = (tanggal) => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    const bulanMap = {
+      'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'Mei': 4, 'Jun': 5,
+      'Jul': 6, 'Agu': 7, 'Sep': 8, 'Okt': 9, 'Nov': 10, 'Des': 11
+    };
+    const parts = tanggal.split(' ');
+    const userMonth = bulanMap[parts[1]];
+    const userYear = parseInt(parts[2]);
+    
+    return (userMonth === currentMonth && userYear === currentYear);
+  };
 
-  const totalUser = users.length;
-  const totalPages = Math.ceil(users.length / 5);
+  // Filter berdasarkan status
+  const filterByStatus = (status) => {
+    setFilterStatus(status);
+    setFilterDate("Semua");
+    setCurrentPage(1);
+  };
 
-  // Filter berdasarkan tab & search
+  // Filter berdasarkan pengguna baru
+  const filterByNewUser = () => {
+    setFilterDate("bulan_ini");
+    setFilterStatus("Semua");
+    setCurrentPage(1);
+  };
+
+  const resetFilter = () => {
+    setFilterStatus("Semua");
+    setFilterDate("Semua");
+    setCurrentPage(1);
+  };
+
+  // Filter data
   const filtered = users.filter((u) => {
-    const matchTab = activeTab === "Semua" || u.status === activeTab;
     const matchSearch = u.nama.toLowerCase().includes(search.toLowerCase()) ||
                         u.email.toLowerCase().includes(search.toLowerCase());
-    return matchTab && matchSearch;
+    const matchStatus = filterStatus === "Semua" || u.status === filterStatus;
+    
+    let matchDate = true;
+    if (filterDate === "bulan_ini") {
+      matchDate = isNewThisMonth(u.bergabung);
+    }
+    
+    return matchSearch && matchStatus && matchDate;
   });
 
-  // Pagination
+  const totalPages = Math.ceil(filtered.length / 5);
   const paginated = filtered.slice((currentPage - 1) * 5, currentPage * 5);
 
-  // Handle Edit
-  const handleEditClick = (user) => {
-    setShowEdit(user);
-    setEditForm({
-      nama: user.nama,
-      email: user.email,
-      skills: user.skills.join(", "),
-      status: user.status,
-      bio: user.bio || ""
-    });
-  };
-
-  const handleEditSave = () => {
-    if (!editForm.nama || !editForm.email) {
-      alert("Nama dan Email harus diisi!");
-      return;
-    }
-
-    const updatedUser = {
-      ...showEdit,
-      nama: editForm.nama,
-      email: editForm.email,
-      skills: editForm.skills.split(",").map(s => s.trim()),
-      status: editForm.status,
-      bio: editForm.bio,
-      inisial: editForm.nama.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
-    };
-
-    setUsers(prev => prev.map(user => user.id === showEdit.id ? updatedUser : user));
-    setShowEdit(null);
-    alert("Data user berhasil diupdate!");
-  };
-
-  // Handle Suspend/Ban
-  const handleSuspend = (user) => {
-    const newStatus = user.status === "Suspended" ? "Aktif" : "Suspended";
+  // Handle Suspend/Ban (Toggle status)
+  const handleSuspendToggle = (user) => {
+    const newStatus = user.status === "Tersuspend" ? "Aktif" : "Tersuspend";
     setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: newStatus } : u));
     setShowSuspend(null);
-    alert(`User ${user.nama} ${newStatus === "Suspended" ? "di-suspend" : "di-aktifkan kembali"}!`);
+    setNotification({
+      message: `${user.nama} berhasil ${newStatus === "Tersuspend" ? "disuspend" : "diaktifkan kembali"}!`,
+      type: "success"
+    });
   };
 
   // Handle Delete
   const handleDelete = (user) => {
     setUsers(prev => prev.filter(u => u.id !== user.id));
     setShowDelete(null);
-    alert(`User ${user.nama} berhasil dihapus!`);
-  };
-
-  // Handle Tambah
-  const handleTambah = () => {
-    if (!tambahForm.nama || !tambahForm.email) {
-      alert("Nama dan Email harus diisi!");
-      return;
-    }
-
-    const warnaList = ["#3b82f6", "#f97316", "#22c55e", "#8b5cf6", "#ef4444", "#ec4899"];
-    const newUser = {
-      id: Date.now(),
-      nama: tambahForm.nama,
-      email: tambahForm.email,
-      inisial: tambahForm.nama.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2),
-      warna: warnaList[Math.floor(Math.random() * warnaList.length)],
-      skills: tambahForm.skills.split(",").map(s => s.trim()).filter(s => s),
-      bergabung: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-      koneksi: 0,
-      rating: null,
-      status: tambahForm.status,
-      bio: tambahForm.bio
-    };
-
-    setUsers(prev => [newUser, ...prev]);
-    setTambahForm({ nama: "", email: "", skills: "", status: "Aktif", bio: "" });
-    setShowTambah(false);
-    alert("User berhasil ditambahkan!");
-  };
-
-  const toggleSelect = (id) => {
-    setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
-  };
-
-  const toggleAll = () => {
-    setSelected(selected.length === filtered.length ? [] : filtered.map((u) => u.id));
+    setNotification({
+      message: `User ${user.nama} berhasil dihapus!`,
+      type: "success"
+    });
   };
 
   const handleExport = () => {
@@ -210,277 +252,403 @@ export default function KelolaUser() {
     a.download = "daftar-pengguna.csv";
     a.click();
     URL.revokeObjectURL(url);
+    setNotification({ message: "Data berhasil diekspor!", type: "success" });
+  };
+
+  const stats = {
+    total: users.length,
+    aktif: users.filter(u => u.status === "Aktif").length,
+    tersuspend: users.filter(u => u.status === "Tersuspend").length,
+    baruBulanIni: users.filter(u => isNewThisMonth(u.bergabung)).length,
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#f8f7f4", fontFamily: "'Poppins','Segoe UI',sans-serif" }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "#fcf5e8", fontFamily: "'Inter', 'Poppins', 'Segoe UI', sans-serif" }}>
       <Sidebar role="superadmin" active="kelola-user" />
 
-      <main style={{ flex: 1, padding: "20px 24px", overflowY: "auto", minWidth: 0, background: "#f8f7f4" }}>
+      <main style={{ 
+        flex: 1, 
+        padding: "24px 28px", 
+        overflowY: "auto",
+        minWidth: 0 
+      }}>
 
-        {/* Breadcrumb & Judul */}
-        <div style={{ marginBottom: 20 }}>
-          <h1 style={{ fontSize: "1.6rem", fontWeight: 700, color: "#1e293b", margin: 0 }}>Kelola User</h1>
-          <p style={{ fontSize: "0.78rem", color: "#94a3b8", margin: "6px 0 0" }}>Dashboard › Kelola User</p>
+        {/* Header */}
+        <div style={{ marginBottom: 24, textAlign: "left" }}>
+          <h1 style={{ 
+            fontSize: "2rem", 
+            fontWeight: 700, 
+            color: "#1e293b", 
+            margin: 0,
+            fontFamily: "'Fraunces', 'Poppins', serif"
+          }}>
+            Kelola User
+          </h1>
+          <p style={{ fontSize: "0.85rem", color: "#94a3b8", margin: "8px 0 0" }}>
+            Kelola semua pengguna yang terdaftar di platform SkillSwap.
+          </p>
         </div>
 
         {/* Stat Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}>
-          {[
-            { label: "Total Pengguna", value: users.length.toString(), sub: "▲ +2 bulan ini", subColor: "#22c55e" },
-            { label: "Sesi Aktif", value: users.filter(u => u.status === "Aktif").length.toString(), sub: "▲ +2 minggu ini", subColor: "#22c55e" },
-            { label: "Laporan Masuk", value: "4", sub: "▼ +2 minggu ini", subColor: "#ef4444" },
-            { label: "Pengguna Tersuspend", value: users.filter(u => u.status === "Tersuspend").length.toString(), sub: "▼ +1 minggu ini", subColor: "#ef4444" },
-          ].map((c) => (
-            <div key={c.label} style={{ background: "white", borderRadius: 16, padding: "20px 24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-              <div style={{ fontSize: "0.73rem", color: "#94a3b8", marginBottom: 6 }}>{c.label}</div>
-              <div style={{ fontSize: "1.8rem", fontWeight: 700, color: "#1e293b", lineHeight: 1 }}>{c.value}</div>
-              {c.sub && <div style={{ fontSize: "0.72rem", color: c.subColor, marginTop: 5 }}>{c.sub}</div>}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 24 }}>
+          {/* Total Pengguna Card */}
+          <div 
+            onClick={resetFilter}
+            style={{ 
+              background: filterStatus === "Semua" && filterDate === "Semua" ? "#e0e7ff" : "white",
+              borderRadius: 16, padding: "16px 18px", 
+              boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              border: filterStatus === "Semua" && filterDate === "Semua" ? "1px solid #3b82f6" : "1px solid transparent"
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#94a3b8", letterSpacing: "0.05em" }}>Total Pengguna</div>
             </div>
-          ))}
-        </div>
-
-        {/* Tabel Card */}
-        <div style={{ background: "white", borderRadius: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", padding: "20px 22px" }}>
-
-          {/* Header tabel */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <h2 style={{ fontSize: "0.95rem", fontWeight: 600, color: "#1e293b", margin: 0 }}>Daftar Pengguna</h2>
-              <span style={{ background: "#f1f5f9", color: "#64748b", fontSize: "0.72rem", fontWeight: 600, padding: "2px 10px", borderRadius: 20 }}>
-                {users.length} user
-              </span>
-            </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button style={btnOutline} onClick={() => setShowFilter(!showFilter)}><Filter size={14} /> Filter</button>
-              <button style={btnOutline} onClick={handleExport}><Download size={14} /> Export</button>
-              <button style={btnPrimary} onClick={() => setShowTambah(true)}><Plus size={14} /> Tambah User</button>
-            </div>
+            <div style={{ fontSize: "1.6rem", fontWeight: 700, color: "#1e293b" }}>{stats.total}</div>
+            <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "#22c55e", marginTop: 6 }}>▲ +2 bulan ini</div>
           </div>
 
-          {/* Tab Status + Search */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <div style={{ display: "flex", gap: 4 }}>
-              {STATUS_TABS.map((tab) => (
-                <button key={tab} onClick={() => { setActiveTab(tab); setCurrentPage(1); }} style={{
-                  padding: "6px 14px", borderRadius: 8, border: "none", fontSize: "0.8rem", fontWeight: 500, cursor: "pointer",
-                  background: activeTab === tab ? "#3b82f6" : "transparent", color: activeTab === tab ? "white" : "#64748b"
-                }}>{tab}</button>
-              ))}
+          {/* Pengguna Aktif Card */}
+          <div 
+            onClick={() => filterByStatus("Aktif")}
+            style={{ 
+              background: filterStatus === "Aktif" && filterDate === "Semua" ? "#dcfce7" : "white",
+              borderRadius: 16, padding: "16px 18px", 
+              boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              border: filterStatus === "Aktif" && filterDate === "Semua" ? "1px solid #22c55e" : "1px solid transparent"
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#94a3b8", letterSpacing: "0.05em" }}>Pengguna Aktif</div>
             </div>
-            <div style={{ position: "relative" }}>
-              <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
-              <input placeholder="Cari nama / email..." value={search} onChange={(e) => setSearch(e.target.value)} style={{
-                paddingLeft: 32, paddingRight: 12, paddingTop: 7, paddingBottom: 7, border: "1px solid #e2e8f0", borderRadius: 8,
-                fontSize: "0.8rem", color: "#475569", outline: "none", width: 200
-              }} />
+            <div style={{ fontSize: "1.6rem", fontWeight: 700, color: "#1e293b" }}>{stats.aktif}</div>
+            <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "#22c55e", marginTop: 6 }}>▲ +2 minggu ini</div>
+          </div>
+
+          {/* Pengguna Baru Card */}
+          <div 
+            onClick={filterByNewUser}
+            style={{ 
+              background: filterDate === "bulan_ini" ? "#fff7ed" : "white",
+              borderRadius: 16, padding: "16px 18px", 
+              boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              border: filterDate === "bulan_ini" ? "1px solid #f97316" : "1px solid transparent"
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#94a3b8", letterSpacing: "0.05em" }}>Pengguna Baru</div>
+            </div>
+            <div style={{ fontSize: "1.6rem", fontWeight: 700, color: "#1e293b" }}>{stats.baruBulanIni}</div>
+            <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "#f97316", marginTop: 6 }}>▲ Bulan Ini</div>
+          </div>
+
+          {/* Pengguna Tersuspend Card */}
+          <div 
+            onClick={() => filterByStatus("Tersuspend")}
+            style={{ 
+              background: filterStatus === "Tersuspend" && filterDate === "Semua" ? "#fef2f2" : "white",
+              borderRadius: 16, padding: "16px 18px", 
+              boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              border: filterStatus === "Tersuspend" && filterDate === "Semua" ? "1px solid #ef4444" : "1px solid transparent"
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#94a3b8", letterSpacing: "0.05em" }}>Pengguna Tersuspend</div>
+            </div>
+            <div style={{ fontSize: "1.6rem", fontWeight: 700, color: "#1e293b" }}>{stats.tersuspend}</div>
+            <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "#ef4444", marginTop: 6 }}>▼ +1 minggu ini</div>
+          </div>
+        </div>
+
+        {/* Reset Filter Button */}
+        {(filterStatus !== "Semua" || filterDate !== "Semua") && (
+          <div style={{ marginBottom: 16, display: "flex", justifyContent: "flex-end" }}>
+            <button
+              onClick={resetFilter}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "6px 12px",
+                borderRadius: 8,
+                background: "#f1f5f9",
+                color: "#64748b",
+                fontSize: "0.7rem",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              <X size={12} /> Reset Filter
+            </button>
+          </div>
+        )}
+
+        {/* Tabel Card */}
+        <div style={{ background: "white", borderRadius: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", padding: "20px 24px" }}>
+
+          {/* Header tabel dengan search di samping filter */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <h2 style={{ fontSize: "1rem", fontWeight: 600, color: "#1e293b", margin: 0 }}>
+                Daftar Pengguna
+                {filterStatus !== "Semua" ? ` - ${filterStatus}` : ""}
+                {filterDate === "bulan_ini" ? " - Pengguna Baru (Bulan Ini)" : ""}
+              </h2>
+              <span style={{ background: "#f1f5f9", color: "#64748b", fontSize: "0.72rem", fontWeight: 600, padding: "2px 10px", borderRadius: 20 }}>
+                {filtered.length} user
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {/* Search Bar - di samping filter */}
+              <div style={{ position: "relative" }}>
+                <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
+                <input 
+                  placeholder="Cari nama / email..." 
+                  value={search} 
+                  onChange={(e) => setSearch(e.target.value)} 
+                  style={{
+                    paddingLeft: 32, paddingRight: 12, paddingTop: 8, paddingBottom: 8, 
+                    border: "1px solid #e2e8f0", borderRadius: 10,
+                    fontSize: "0.8rem", color: "#475569", outline: "none", width: 220
+                  }} 
+                />
+              </div>
+              
+              {/* Filter Button */}
+              <div style={{ position: "relative" }}>
+                <button 
+                  style={btnOutline} 
+                  onClick={() => setShowFilter(!showFilter)}
+                >
+                  <Filter size={14} /> Filter
+                </button>
+                {showFilter && (
+                  <div style={{
+                    position: "absolute",
+                    top: "calc(100% + 8px)",
+                    right: 0,
+                    background: "white",
+                    borderRadius: 12,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                    padding: "12px",
+                    minWidth: 160,
+                    zIndex: 50,
+                    border: "1px solid #e2e8f0",
+                  }}>
+                    <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#94a3b8", marginBottom: 8 }}>FILTER STATUS</div>
+                    {["Aktif", "Tersuspend"].map((s) => (
+                      <div 
+                        key={s} 
+                        onClick={() => { filterByStatus(s); setShowFilter(false); }} 
+                        style={{ 
+                          padding: "8px 12px", 
+                          borderRadius: 8, 
+                          cursor: "pointer", 
+                          fontSize: "0.8rem",
+                          background: filterStatus === s && filterDate === "Semua" ? "#eff6ff" : "transparent",
+                          color: filterStatus === s && filterDate === "Semua" ? "#3b82f6" : "#475569",
+                          fontWeight: filterStatus === s && filterDate === "Semua" ? 600 : 400,
+                          marginBottom: 4
+                        }}
+                      >
+                        {s}
+                      </div>
+                    ))}
+                    <div 
+                      onClick={() => { filterByNewUser(); setShowFilter(false); }} 
+                      style={{ 
+                        padding: "8px 12px", 
+                        borderRadius: 8, 
+                        cursor: "pointer", 
+                        fontSize: "0.8rem",
+                        background: filterDate === "bulan_ini" ? "#eff6ff" : "transparent",
+                        color: filterDate === "bulan_ini" ? "#3b82f6" : "#475569",
+                        fontWeight: filterDate === "bulan_ini" ? 600 : 400,
+                        marginBottom: 8
+                      }}
+                    >
+                      Pengguna Baru (Bulan Ini)
+                    </div>
+                    <div style={{ borderTop: "1px solid #f1f5f9", margin: "8px 0" }} />
+                    <div 
+                      onClick={() => { resetFilter(); setShowFilter(false); }} 
+                      style={{ 
+                        padding: "8px 12px", 
+                        borderRadius: 8, 
+                        cursor: "pointer", 
+                        fontSize: "0.8rem",
+                        color: "#ef4444",
+                        textAlign: "center"
+                      }}
+                    >
+                      Reset Filter
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Export Button */}
+              <button style={btnOutline} onClick={handleExport}>
+                <Download size={14} /> Export
+              </button>
             </div>
           </div>
 
           {/* Tabel */}
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.83rem" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
-                <th style={th}><input type="checkbox" checked={selected.length === filtered.length && filtered.length > 0} onChange={toggleAll} /></th>
-                <th style={{ ...th, textAlign: "left" }}>Nama / Email</th>
-                <th style={{ ...th, textAlign: "left" }}>Skill</th>
-                <th style={{ ...th, textAlign: "left" }}>Bergabung</th>
-                <th style={{ ...th, textAlign: "left" }}>Koneksi</th>
-                <th style={{ ...th, textAlign: "left" }}>Rating</th>
-                <th style={{ ...th, textAlign: "left" }}>Status</th>
-                <th style={{ ...th, textAlign: "left" }}>Aksi</th>
-               </tr>
-            </thead>
-            <tbody>
-              {paginated.map((user) => (
-                <tr key={user.id} style={{ borderBottom: "1px solid #f8fafc", background: selected.includes(user.id) ? "#f8faff" : "white" }}>
-                  <td style={td}><input type="checkbox" checked={selected.includes(user.id)} onChange={() => toggleSelect(user.id)} /></td>
-                  <td style={td}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 30, height: 30, borderRadius: "50%", background: user.warna, color: "white", fontSize: "0.72rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{user.inisial}</div>
-                      <div><div style={{ fontWeight: 600, color: "#1e293b", fontSize: "0.8rem" }}>{user.nama}</div><div style={{ color: "#94a3b8", fontSize: "0.7rem" }}>{user.email}</div></div>
-                    </div>
-                  </td>
-                  <td style={td}>
-                    <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                      {user.skills.map((s) => {
-                        const c = skillColors[s] || { bg: "#f1f5f9", text: "#64748b" };
-                        return <span key={s} style={{ background: c.bg, color: c.text, fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 6 }}>{s}</span>;
-                      })}
-                    </div>
-                  </td>
-                  <td style={{ ...td, color: "#64748b", fontSize: "0.78rem" }}>{user.bergabung}</td>
-                  <td style={{ ...td, color: "#475569", fontWeight: 500 }}>{user.koneksi}</td>
-                  <td style={td}>
-                    {user.rating ? (
-                      <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                        <Star size={13} fill="#fbbf24" color="#fbbf24" />
-                        <span style={{ fontWeight: 600, color: "#475569", fontSize: "0.8rem" }}>{user.rating.toFixed(1)}</span>
-                      </div>
-                    ) : <span style={{ color: "#cbd5e1", fontSize: "0.75rem" }}>—</span>}
-                  </td>
-                  <td style={td}><StatusBadge status={user.status} /></td>
-                  <td style={td}>
-                    <div style={{ display: "flex", gap: 4 }}>
-                      {/* Tombol EDIT */}
-                      <button title="Edit" style={actionBtn("#eff6ff", "#3b82f6")} onClick={() => handleEditClick(user)}>
-                        <Edit size={13} />
-                      </button>
-                      {/* Tombol SUSPEND */}
-                      <button title={user.status === "Suspended" ? "Aktifkan" : "Suspend"} style={actionBtn("#fff7ed", "#f97316")} onClick={() => setShowSuspend(user)}>
-                        <Ban size={13} />
-                      </button>
-                      {/* Tombol HAPUS */}
-                      <button title="Hapus" style={actionBtn("#fef2f2", "#ef4444")} onClick={() => setShowDelete(user)}>
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </td>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem", minWidth: 800 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <th style={{ ...th, textAlign: "left" }}>Nama / Email</th>
+                  <th style={{ ...th, textAlign: "left" }}>Skill</th>
+                  <th style={{ ...th, textAlign: "left" }}>Bergabung</th>
+                  <th style={{ ...th, textAlign: "left" }}>Koneksi</th>
+                  <th style={{ ...th, textAlign: "left" }}>Rating</th>
+                  <th style={{ ...th, textAlign: "left" }}>Status</th>
+                  <th style={{ ...th, textAlign: "left" }}>Aksi</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {paginated.map((user) => (
+                  <tr key={user.id} style={{ borderBottom: "1px solid #f8fafc" }}>
+                    <td style={td}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: "50%", background: user.warna, color: "white", fontSize: "0.75rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{user.inisial}</div>
+                        <div>
+                          <div style={{ fontWeight: 600, color: "#1e293b", fontSize: "0.85rem" }}>{user.nama}</div>
+                          <div style={{ color: "#94a3b8", fontSize: "0.7rem" }}>{user.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={td}>
+                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                        {user.skills.map((s) => {
+                          const c = skillColors[s] || { bg: "#f1f5f9", text: "#64748b" };
+                          return <span key={s} style={{ background: c.bg, color: c.text, fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 6 }}>{s}</span>;
+                        })}
+                      </div>
+                    </td>
+                    <td style={{ ...td, color: "#64748b", fontSize: "0.8rem" }}>{user.bergabung}</td>
+                    <td style={{ ...td, color: "#475569", fontWeight: 500 }}>{user.koneksi}</td>
+                    <td style={td}>
+                      {user.rating ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                          <Star size={13} fill="#fbbf24" color="#fbbf24" />
+                          <span style={{ fontWeight: 600, color: "#475569", fontSize: "0.8rem" }}>{user.rating.toFixed(1)}</span>
+                        </div>
+                      ) : <span style={{ color: "#cbd5e1", fontSize: "0.75rem" }}>—</span>}
+                    </td>
+                    <td style={td}><StatusBadge status={user.status} /></td>
+                    <td style={td}>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button 
+                          title={user.status === "Tersuspend" ? "Aktifkan" : "Suspend"} 
+                          style={actionBtn("#eff6ff", "#3b82f6")} 
+                          onClick={() => setShowSuspend(user)}
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button 
+                          title="Hapus" 
+                          style={actionBtn("#fef2f2", "#ef4444")} 
+                          onClick={() => setShowDelete(user)}
+                        >
+                          <Ban size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {/* Pagination */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 18, paddingTop: 14, borderTop: "1px solid #f1f5f9" }}>
-            <span style={{ fontSize: "0.78rem", color: "#94a3b8" }}>Menampilkan 1–{paginated.length} dari {filtered.length} user</span>
-            <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} style={pageBtn(false)} disabled={currentPage === 1}><ChevronLeft size={14} /></button>
-              {[...Array(Math.min(3, totalPages))].map((_, idx) => {
-                let pageNum = idx + 1;
-                if (totalPages > 3 && currentPage > 2) pageNum = currentPage - 1 + idx;
-                if (pageNum > totalPages) return null;
-                return <button key={pageNum} onClick={() => setCurrentPage(pageNum)} style={pageBtn(currentPage === pageNum)}>{pageNum}</button>;
-              })}
-              {totalPages > 3 && currentPage < totalPages - 1 && <span style={{ color: "#94a3b8", fontSize: "0.8rem", padding: "0 4px" }}>...</span>}
-              {totalPages > 3 && <button onClick={() => setCurrentPage(totalPages)} style={pageBtn(currentPage === totalPages)}>{totalPages}</button>}
-              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} style={pageBtn(false)} disabled={currentPage === totalPages}><ChevronRight size={14} /></button>
+          {filtered.length > 0 && (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, paddingTop: 16, borderTop: "1px solid #f1f5f9" }}>
+              <span style={{ fontSize: "0.78rem", color: "#94a3b8" }}>Menampilkan {((currentPage-1)*5)+1} - {Math.min(currentPage*5, filtered.length)} dari {filtered.length} user</span>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} style={pageBtn(false)} disabled={currentPage === 1}><ChevronLeft size={14} /></button>
+                {[...Array(Math.min(3, totalPages))].map((_, idx) => {
+                  let pageNum = idx + 1;
+                  if (totalPages > 3 && currentPage > 2) pageNum = currentPage - 1 + idx;
+                  if (pageNum > totalPages) return null;
+                  return <button key={pageNum} onClick={() => setCurrentPage(pageNum)} style={pageBtn(currentPage === pageNum)}>{pageNum}</button>;
+                })}
+                {totalPages > 3 && currentPage < totalPages - 1 && <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>...</span>}
+                {totalPages > 3 && <button onClick={() => setCurrentPage(totalPages)} style={pageBtn(currentPage === totalPages)}>{totalPages}</button>}
+                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} style={pageBtn(false)} disabled={currentPage === totalPages}><ChevronRight size={14} /></button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Footer */}
-        <div style={{ textAlign: "center", marginTop: 32, fontSize: "0.75rem", color: "#94a3b8", paddingBottom: 16 }}>
-          © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
-        </div>
+        {/* Modal Suspend/Aktifkan */}
+        {showSuspend && (
+          <div style={modalOverlay} onClick={() => setShowSuspend(null)}>
+            <div style={{ ...modalContent, width: 400 }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ textAlign: "center", padding: "28px 24px" }}>
+                <div style={{ width: 56, height: 56, borderRadius: "50%", background: showSuspend.status === "Tersuspend" ? "#dcfce7" : "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                  {showSuspend.status === "Tersuspend" ? <UserCheck size={28} color="#22c55e" /> : <Ban size={28} color="#d97706" />}
+                </div>
+                <h3 style={{ fontSize: "1rem", fontWeight: 700, margin: "0 0 8px" }}>{showSuspend.status === "Tersuspend" ? "Aktifkan User?" : "Suspend User?"}</h3>
+                <p style={{ fontSize: "0.85rem", color: "#64748b", marginBottom: 20 }}>
+                  {showSuspend.status === "Tersuspend" ? `User ${showSuspend.nama} akan diaktifkan kembali.` : `User ${showSuspend.nama} akan di-suspend sementara.`}
+                </p>
+                <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                  <button style={modalCancelBtn} onClick={() => setShowSuspend(null)}>Batal</button>
+                  <button style={{ ...modalSaveBtn, background: showSuspend.status === "Tersuspend" ? "#22c55e" : "#d97706" }} onClick={() => handleSuspendToggle(showSuspend)}>
+                    {showSuspend.status === "Tersuspend" ? "Ya, Aktifkan" : "Ya, Suspend"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Delete */}
+        {showDelete && (
+          <div style={modalOverlay} onClick={() => setShowDelete(null)}>
+            <div style={{ ...modalContent, width: 400 }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ textAlign: "center", padding: "28px 24px" }}>
+                <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#fee2e2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}><AlertTriangle size={28} color="#ef4444" /></div>
+                <h3 style={{ fontSize: "1rem", fontWeight: 700, margin: "0 0 8px" }}>Hapus User?</h3>
+                <p style={{ fontSize: "0.85rem", color: "#64748b", marginBottom: 20 }}>Hapus user <strong>{showDelete.nama}</strong>? Tindakan ini tidak dapat dibatalkan.</p>
+                <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                  <button style={modalCancelBtn} onClick={() => setShowDelete(null)}>Batal</button>
+                  <button style={{ ...modalSaveBtn, background: "#ef4444" }} onClick={() => handleDelete(showDelete)}>Ya, Hapus</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Notifikasi */}
+        {notification && (
+          <NotificationModal
+            message={notification.message}
+            type={notification.type}
+            onClose={() => setNotification(null)}
+          />
+        )}
       </main>
-
-      {/* ── MODAL EDIT ── */}
-      {showEdit && (
-        <div style={modalOverlay} onClick={() => setShowEdit(null)}>
-          <div style={modalContent} onClick={(e) => e.stopPropagation()}>
-            <div style={modalHeader(showEdit.warna)}>
-              <button style={modalClose} onClick={() => setShowEdit(null)}><X size={18} /></button>
-              <div style={modalIcon}><Edit size={24} color="white" /></div>
-              <h3 style={modalTitle}>Edit User</h3>
-              <p style={modalSubtitle}>Perbarui data pengguna</p>
-            </div>
-            <div style={{ padding: "24px" }}>
-              <div style={{ marginBottom: 16 }}><label style={labelModal}>Nama Lengkap *</label><input type="text" style={inputModal} value={editForm.nama} onChange={(e) => setEditForm({...editForm, nama: e.target.value})} /></div>
-              <div style={{ marginBottom: 16 }}><label style={labelModal}>Email *</label><input type="email" style={inputModal} value={editForm.email} onChange={(e) => setEditForm({...editForm, email: e.target.value})} /></div>
-              <div style={{ marginBottom: 16 }}><label style={labelModal}>Skills (pisahkan dengan koma)</label><input type="text" style={inputModal} placeholder="UI/UX, React, Figma" value={editForm.skills} onChange={(e) => setEditForm({...editForm, skills: e.target.value})} /></div>
-              <div style={{ marginBottom: 16 }}><label style={labelModal}>Status</label><select style={inputModal} value={editForm.status} onChange={(e) => setEditForm({...editForm, status: e.target.value})}><option>Aktif</option><option>Suspended</option><option>Tidak Aktif</option></select></div>
-              <div style={{ marginBottom: 16 }}><label style={labelModal}>Bio</label><textarea rows="3" style={{...inputModal, resize: "none"}} value={editForm.bio} onChange={(e) => setEditForm({...editForm, bio: e.target.value})} /></div>
-            </div>
-            <div style={modalFooter}><button style={modalCancelBtn} onClick={() => setShowEdit(null)}>Batal</button><button style={modalSaveBtn} onClick={handleEditSave}>Simpan Perubahan</button></div>
-          </div>
-        </div>
-      )}
-
-      {/* ── MODAL SUSPEND ── */}
-      {showSuspend && (
-        <div style={modalOverlay} onClick={() => setShowSuspend(null)}>
-          <div style={{ ...modalContent, width: 400 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ textAlign: "center", padding: "28px 24px" }}>
-              <div style={{ width: 56, height: 56, borderRadius: "50%", background: showSuspend.status === "Suspended" ? "#dcfce7" : "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-                {showSuspend.status === "Suspended" ? <UserCheck size={28} color="#22c55e" /> : <Ban size={28} color="#d97706" />}
-              </div>
-              <h3 style={{ fontSize: "1rem", fontWeight: 700, margin: "0 0 8px" }}>{showSuspend.status === "Suspended" ? "Aktifkan User?" : "Suspend User?"}</h3>
-              <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: 20 }}>
-                {showSuspend.status === "Suspended" ? `User ${showSuspend.nama} akan diaktifkan kembali.` : `User ${showSuspend.nama} akan di-suspend sementara.`}
-              </p>
-              <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-                <button style={modalCancelBtn} onClick={() => setShowSuspend(null)}>Batal</button>
-                <button style={{ ...modalSaveBtn, background: showSuspend.status === "Suspended" ? "#22c55e" : "#d97706" }} onClick={() => handleSuspend(showSuspend)}>
-                  {showSuspend.status === "Suspended" ? "Ya, Aktifkan" : "Ya, Suspend"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── MODAL DELETE ── */}
-      {showDelete && (
-        <div style={modalOverlay} onClick={() => setShowDelete(null)}>
-          <div style={{ ...modalContent, width: 400 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ textAlign: "center", padding: "28px 24px" }}>
-              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#fee2e2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}><AlertTriangle size={28} color="#ef4444" /></div>
-              <h3 style={{ fontSize: "1rem", fontWeight: 700, margin: "0 0 8px" }}>Hapus User?</h3>
-              <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: 20 }}>Hapus user <strong>{showDelete.nama}</strong>? Tindakan ini tidak dapat dibatalkan.</p>
-              <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-                <button style={modalCancelBtn} onClick={() => setShowDelete(null)}>Batal</button>
-                <button style={{ ...modalSaveBtn, background: "#ef4444" }} onClick={() => handleDelete(showDelete)}>Ya, Hapus</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── MODAL TAMBAH ── */}
-      {showTambah && (
-        <div style={modalOverlay} onClick={() => setShowTambah(false)}>
-          <div style={modalContent} onClick={(e) => e.stopPropagation()}>
-            <div style={modalHeader("#3b82f6")}>
-              <button style={modalClose} onClick={() => setShowTambah(false)}><X size={18} /></button>
-              <div style={modalIcon}><Plus size={24} color="white" /></div>
-              <h3 style={modalTitle}>Tambah User Baru</h3>
-              <p style={modalSubtitle}>Isi data pengguna baru</p>
-            </div>
-            <div style={{ padding: "24px" }}>
-              <div style={{ marginBottom: 16 }}><label style={labelModal}>Nama Lengkap *</label><input type="text" style={inputModal} placeholder="Masukkan nama" value={tambahForm.nama} onChange={(e) => setTambahForm({...tambahForm, nama: e.target.value})} /></div>
-              <div style={{ marginBottom: 16 }}><label style={labelModal}>Email *</label><input type="email" style={inputModal} placeholder="nama@email.com" value={tambahForm.email} onChange={(e) => setTambahForm({...tambahForm, email: e.target.value})} /></div>
-              <div style={{ marginBottom: 16 }}><label style={labelModal}>Skills (pisahkan dengan koma)</label><input type="text" style={inputModal} placeholder="UI/UX, React, Figma" value={tambahForm.skills} onChange={(e) => setTambahForm({...tambahForm, skills: e.target.value})} /></div>
-              <div style={{ marginBottom: 16 }}><label style={labelModal}>Status</label><select style={inputModal} value={tambahForm.status} onChange={(e) => setTambahForm({...tambahForm, status: e.target.value})}><option>Aktif</option><option>Suspended</option><option>Tidak Aktif</option></select></div>
-              <div style={{ marginBottom: 16 }}><label style={labelModal}>Bio</label><textarea rows="3" style={{...inputModal, resize: "none"}} placeholder="Tentang user..." value={tambahForm.bio} onChange={(e) => setTambahForm({...tambahForm, bio: e.target.value})} /></div>
-            </div>
-            <div style={modalFooter}><button style={modalCancelBtn} onClick={() => setShowTambah(false)}>Batal</button><button style={modalSaveBtn} onClick={handleTambah}>Simpan User</button></div>
-          </div>
-        </div>
-      )}
-
-      {/* ── FILTER DROPDOWN ── */}
-      {showFilter && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 50 }} onClick={() => setShowFilter(false)}>
-          <div style={{ position: "absolute", top: 200, right: 120, background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.12)", padding: "16px", minWidth: 200 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "#1e293b", marginBottom: 12 }}>Filter berdasarkan:</div>
-            {["Aktif", "Suspended", "Tidak Aktif"].map((s) => (
-              <div key={s} onClick={() => { setActiveTab(s); setShowFilter(false); }} style={{ padding: "8px 12px", borderRadius: 8, cursor: "pointer", fontSize: "0.83rem", background: activeTab === s ? "#eff6ff" : "transparent", color: activeTab === s ? "#3b82f6" : "#475569", fontWeight: activeTab === s ? 600 : 400 }}>{s}</div>
-            ))}
-            <div onClick={() => { setActiveTab("Semua"); setShowFilter(false); }} style={{ padding: "8px 12px", borderRadius: 8, cursor: "pointer", fontSize: "0.83rem", color: "#ef4444", marginTop: 4, borderTop: "1px solid #f1f5f9", paddingTop: 12 }}>Reset Filter</div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
 // ── Style helpers ─────────────────────────────────────────
-const btnOutline = { display: "flex", alignItems: "center", gap: 5, padding: "7px 14px", borderRadius: 8, border: "1px solid #e2e8f0", background: "white", color: "#475569", fontSize: "0.8rem", fontWeight: 500, cursor: "pointer" };
-const btnPrimary = { display: "flex", alignItems: "center", gap: 5, padding: "7px 14px", borderRadius: 8, border: "none", background: "#3b82f6", color: "white", fontSize: "0.8rem", fontWeight: 500, cursor: "pointer" };
-const th = { padding: "8px 10px", color: "#94a3b8", fontWeight: 500, fontSize: "0.75rem", whiteSpace: "nowrap" };
-const td = { padding: "10px 10px", verticalAlign: "middle" };
-const actionBtn = (bg, color) => ({ width: 28, height: 28, borderRadius: 7, background: bg, color, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" });
-const pageBtn = (active) => ({ minWidth: 30, height: 30, borderRadius: 7, border: active ? "none" : "1px solid #e2e8f0", background: active ? "#3b82f6" : "white", color: active ? "white" : "#64748b", fontSize: "0.8rem", fontWeight: active ? 600 : 400, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" });
-const labelModal = { display: "block", fontSize: "0.75rem", fontWeight: 600, color: "#475569", marginBottom: 6 };
-const inputModal = { width: "100%", padding: "10px 12px", border: "1px solid #e2e8f0", borderRadius: 10, fontSize: "0.8rem", outline: "none", boxSizing: "border-box" };
+const btnOutline = { display: "flex", alignItems: "center", gap: 5, padding: "7px 14px", borderRadius: 10, border: "1px solid #e2e8f0", background: "white", color: "#475569", fontSize: "0.8rem", fontWeight: 500, cursor: "pointer" };
+const th = { padding: "14px 12px", color: "#94a3b8", fontWeight: 600, fontSize: "0.7rem", whiteSpace: "nowrap", letterSpacing: "0.05em" };
+const td = { padding: "14px 12px", verticalAlign: "middle" };
+const actionBtn = (bg, color) => ({ width: 32, height: 32, borderRadius: 8, background: bg, color, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" });
+const pageBtn = (active) => ({ minWidth: 30, height: 30, borderRadius: 8, border: active ? "none" : "1px solid #e2e8f0", background: active ? "#1e3a5f" : "white", color: active ? "white" : "#64748b", fontSize: "0.8rem", fontWeight: active ? 600 : 400, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" });
 const modalOverlay = { position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 };
 const modalContent = { background: "white", borderRadius: 24, width: 500, maxWidth: "90%", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)", overflow: "hidden" };
-const modalHeader = (color) => ({ padding: "24px 28px", background: `linear-gradient(135deg, ${color}20 0%, ${color}40 100%)`, position: "relative" });
-const modalClose = { position: "absolute", right: 20, top: 20, background: "rgba(0,0,0,0.1)", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" };
-const modalIcon = { width: 48, height: 48, borderRadius: 16, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 };
-const modalTitle = { fontSize: "1.2rem", fontWeight: 700, color: "#1e293b", margin: 0 };
-const modalSubtitle = { fontSize: "0.75rem", color: "#64748b", margin: "4px 0 0" };
-const modalFooter = { padding: "16px 24px", background: "#f8fafc", display: "flex", gap: 12, justifyContent: "flex-end", borderTop: "1px solid #e2e8f0" };
-const modalCancelBtn = { padding: "8px 20px", borderRadius: 10, border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontSize: "0.8rem", cursor: "pointer" };
-const modalSaveBtn = { padding: "8px 24px", borderRadius: 10, border: "none", background: "#3b82f6", color: "white", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer" };
+const modalCancelBtn = { padding: "10px 20px", borderRadius: 10, border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontSize: "0.8rem", cursor: "pointer" };
+const modalSaveBtn = { padding: "10px 24px", borderRadius: 10, border: "none", background: "#1e3a5f", color: "white", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer" };

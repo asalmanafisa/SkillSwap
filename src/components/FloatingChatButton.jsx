@@ -1,41 +1,24 @@
+// src/components/FloatingChatButton.jsx
 import { Link } from 'react-router-dom';
 
 const FloatingChatButton = () => {
   return (
     <Link
       to="/chat"
-      style={{
-        position: 'fixed',
-        bottom: '24px',
-        right: '24px',
-        backgroundColor: '#234c6a',
-        color: 'white',
-        width: '56px',
-        height: '56px',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-        zIndex: 1000,
-        transition: '0.2s',
-        textDecoration: 'none',
-      }}
-      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1a3d55'}
-      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#234c6a'}
+      className="fixed bottom-6 right-6 bg-[#234c6a] text-white p-4 rounded-full shadow-lg hover:bg-[#1a3d55] transition-all duration-300 z-50 group"
     >
       <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        className="w-6 h-6 group-hover:scale-110 transition-transform"
         fill="none"
         stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        viewBox="0 0 24 24"
       >
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+        />
       </svg>
     </Link>
   );

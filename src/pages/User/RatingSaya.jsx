@@ -13,7 +13,6 @@ const RatingSaya = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Poppins', sans-serif", backgroundColor: '#fcf5e8' }}>
-      <Navbar />
       <div className="max-w-4xl mx-auto px-5 py-8 flex-1">
         <h1 className="font-serif text-3xl font-bold text-gray-800">Rating untuk Anda</h1>
         <p className="text-gray-500 mt-2 mb-8">Apa kata partner tentang Anda</p>
@@ -34,7 +33,6 @@ const RatingSaya = () => {
           ))}
         </div>
       </div>
-      <footer className="bg-[#234c6a] text-white/80 py-3 text-center text-[11px] w-full">© 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.</footer>
       <FloatingChatButton />
     </div>
   );

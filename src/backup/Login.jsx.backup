@@ -1,9 +1,10 @@
 // src/pages/User/Login.jsx
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import heroBg from './images/hero-bg.jpg';  
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
@@ -17,51 +18,61 @@ const Login = () => {
     document.head.appendChild(link);
   }, []);
 
-  const handleLogin = () => {
+  // Data user (dummy) - user, admin, superadmin
+  const dummyUsers = [
+    // User biasa (bisa register)
+    { id: 1, email: 'yasmine@gmail.com', password: '123456', name: 'Yasmine Shavira', role: 'user' },
+    { id: 2, email: 'amira@gmail.com', password: 'test123', name: 'Amira Salma', role: 'user' },
+    // Admin (dibuat oleh superadmin)
+    { id: 3, email: 'admin@skillswap.com', password: 'admin123', name: 'Admin SkillSwap', role: 'admin' },
+    // Superadmin (dibuat manual di database)
+    { id: 4, email: 'superadmin@skillswap.com', password: 'super123', name: 'Superadmin', role: 'superadmin' },
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
     setError('');
     
-    console.log('🔍 Login attempt:', { email, password });
+    // Cari user berdasarkan email
+    const user = dummyUsers.find((u) => u.email === email);
     
-    // ADMIN
-    if (email === 'admin@skillswap.com' && password === 'admin123') {
-      console.log('✅ Login sebagai ADMIN');
-      localStorage.setItem('token', 'dummy');
-      localStorage.setItem('role', 'admin');
-      console.log('📦 Role saved:', localStorage.getItem('role'));
-      window.location.href = '/admin/dashboard';
+    if (!user) {
+      setError('Email belum terdaftar. Silakan daftar terlebih dahulu.');
       return;
     }
     
-    // SUPERADMIN
-    if (email === 'superadmin@skillswap.com' && password === 'super123') {
-      console.log('✅ Login sebagai SUPERADMIN');
-      localStorage.setItem('token', 'dummy');
-      localStorage.setItem('role', 'superadmin');
-      console.log('📦 Role saved:', localStorage.getItem('role'));
-      window.location.href = '/superadmin/dashboard';
+    if (user.password !== password) {
+      setError('Password salah. Coba lagi.');
       return;
     }
     
-    // USER
-    if (email === 'yasmine@gmail.com' && password === '123456') {
-      console.log('✅ Login sebagai USER');
-      localStorage.setItem('token', 'dummy');
-      localStorage.setItem('role', 'user');
-      console.log('📦 Role saved:', localStorage.getItem('role'));
-      window.location.href = '/beranda';
-      return;
+    // Data user yang akan disimpan
+    const userData = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    };
+    
+    // Simpan sesuai pilihan "Ingat saya"
+    if (remember) {
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('role', user.role);
+      localStorage.setItem('token', 'dummy-token-' + Date.now());
+    } else {
+      sessionStorage.setItem('user', JSON.stringify(userData));
+      sessionStorage.setItem('role', user.role);
+      sessionStorage.setItem('token', 'dummy-token-' + Date.now());
     }
     
-    if (email === 'amira@gmail.com' && password === 'test123') {
-      console.log('✅ Login sebagai USER');
-      localStorage.setItem('token', 'dummy');
-      localStorage.setItem('role', 'user');
-      console.log('📦 Role saved:', localStorage.getItem('role'));
-      window.location.href = '/beranda';
-      return;
+    // Redirect berdasarkan role
+    if (user.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (user.role === 'superadmin') {
+      navigate('/superadmin/dashboard');
+    } else {
+      navigate('/beranda');
     }
-    
-    setError('Email atau password salah');
   };
 
   return (
@@ -85,7 +96,7 @@ const Login = () => {
               </div>
             )}
 
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
                 <input
@@ -94,6 +105,7 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a] text-sm"
                   placeholder="email@example.com"
+                  required
                 />
               </div>
               <div>
@@ -105,6 +117,7 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-4 py-2 border border-[#e5e0d8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#234c6a] pr-10 text-sm"
                     placeholder="********"
+                    required
                   />
                   <button
                     type="button"
@@ -139,23 +152,29 @@ const Login = () => {
               </div>
 
               <button
-                onClick={handleLogin}
+                type="submit"
                 className="w-full bg-[#234c6a] text-white py-2 rounded-lg font-semibold text-sm hover:bg-[#1a3d55] transition flex items-center justify-center gap-2"
               >
                 Masuk <span>→</span>
               </button>
-            </div>
+            </form>
 
             <p className="text-center text-xs text-gray-500 mt-6">
               Belum punya akun?{' '}
               <Link to="/register" className="text-[#234c6a] font-semibold hover:underline">Daftar sekarang</Link>
             </p>
+            
+            
           </div>
         </div>
 
         {/* Kolom kanan - branding */}
         <div className="hidden lg:flex lg:w-1/2 bg-[#234c6a] text-white flex-col items-center justify-center px-12 relative overflow-hidden">
-          <img src={heroBg} alt="Background" className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none" />
+          <img 
+            src={heroBg} 
+            alt="Background" 
+            className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none"
+          />
           <div className="absolute right-0 top-0 w-64 h-64 bg-[#f5c842]/10 rounded-full blur-3xl"></div>
           <div className="absolute left-0 bottom-0 w-72 h-72 bg-[#f5c842]/5 rounded-full blur-3xl"></div>
           <div className="relative z-10 max-w-md text-center">

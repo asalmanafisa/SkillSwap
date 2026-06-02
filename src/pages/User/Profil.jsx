@@ -162,7 +162,6 @@ const Profil = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Poppins', sans-serif", backgroundColor: '#fcf5e8' }}>
-      <Navbar />
       <div className="relative bg-[#234c6a] h-48 md:h-64 overflow-hidden">
         <img src={heroBg} alt="Header" className="absolute inset-0 w-full h-full object-cover opacity-10" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#234c6a]/50 to-[#234c6a]/80"></div>
@@ -240,9 +239,6 @@ const Profil = () => {
         </div>
       </div>
       
-      <footer className="bg-[#234c6a] text-white/80 py-3 text-center text-[11px] w-full">
-        © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
-      </footer>
       <FloatingChatButton />
 
       {/* Modal Upload - Mendukung Gambar dan PDF */}

@@ -15,6 +15,13 @@ const Register = () => {
   });
   const [remember, setRemember] = useState(false);
   const [passwordError, setPasswordError] = useState('');
+  
+  // State untuk OTP
+  const [showOTP, setShowOTP] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [storedOTP, setStoredOTP] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   useEffect(() => {
     const link = document.createElement('link');
@@ -22,6 +29,14 @@ const Register = () => {
     link.rel = 'stylesheet';
     document.head.appendChild(link);
   }, []);
+
+  // Timer untuk resend OTP
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -49,38 +64,115 @@ const Register = () => {
     }
   };
 
+  // Generate OTP 6 digit
+  const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  // Kirim OTP (simulasi)
+  const sendOTP = (email, otpCode) => {
+    // Di production, ini akan kirim email/SMS
+    console.log(`📧 Kirim OTP ke ${email}: ${otpCode}`);
+    
+    // Tampilkan alert untuk demo (bisa dihapus setelah backend ready)
+    alert(`[DEMO] Kode OTP Anda: ${otpCode}\n(Dikirim ke ${email})`);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validasi form
     if (passwordError) {
       alert('Periksa kembali password Anda');
       return;
     }
+    if (!form.name || !form.email || !form.password) {
+      alert('Nama, Email, dan Password wajib diisi!');
+      return;
+    }
     
-    // Role FIX: selalu 'user' (tidak bisa pilih admin/superadmin)
-    const newUser = {
-      id: Date.now(),
+    // Simpan data user sementara ke sessionStorage
+    const tempUser = {
       name: form.name,
       email: form.email,
       location: form.location,
       skills: form.skills,
-      role: 'user'
+      role: 'user',
+      verified: false,
+      createdAt: new Date().toISOString()
     };
+    sessionStorage.setItem('tempUser', JSON.stringify(tempUser));
+    sessionStorage.setItem('remember', remember.toString());
     
-    console.log('Register:', { ...form, remember });
+    // Generate dan kirim OTP
+    const otpCode = generateOTP();
+    setStoredOTP(otpCode);
+    sendOTP(form.email, otpCode);
     
-    // Simpan ke localStorage
-    if (remember) {
-      localStorage.setItem('user', JSON.stringify(newUser));
-      localStorage.setItem('role', 'user');
-      localStorage.setItem('token', 'dummy-token-' + Date.now());
+    // Buka modal OTP
+    setShowOTP(true);
+    setOtp("");
+    setOtpError("");
+    setResendCooldown(60); // Cooldown 60 detik untuk resend
+  };
+
+  // Resend OTP
+  const handleResendOTP = () => {
+    if (resendCooldown > 0) return;
+    
+    const newOTP = generateOTP();
+    setStoredOTP(newOTP);
+    sendOTP(form.email, newOTP);
+    setResendCooldown(60);
+    setOtpError("");
+  };
+
+  // Verifikasi OTP
+  const handleVerifyOTP = () => {
+    if (otp === storedOTP) {
+      // Ambil data user sementara
+      const tempUser = JSON.parse(sessionStorage.getItem('tempUser'));
+      const rememberMe = sessionStorage.getItem('remember') === 'true';
+      
+      // Buat user final dengan status verified
+      const finalUser = {
+        id: Date.now(),
+        ...tempUser,
+        verified: true,
+        verifiedAt: new Date().toISOString()
+      };
+      
+      // Simpan user
+      if (rememberMe) {
+        localStorage.setItem('user', JSON.stringify(finalUser));
+        localStorage.setItem('role', finalUser.role);
+        localStorage.setItem('token', 'dummy-token-' + Date.now());
+      } else {
+        sessionStorage.setItem('user', JSON.stringify(finalUser));
+        sessionStorage.setItem('role', finalUser.role);
+        sessionStorage.setItem('token', 'dummy-token-' + Date.now());
+      }
+      
+      // Bersihkan data temporary
+      sessionStorage.removeItem('tempUser');
+      sessionStorage.removeItem('remember');
+      
+      // Tutup modal OTP
+      setShowOTP(false);
+      
+      // Redirect ke beranda
+      navigate('/beranda');
     } else {
-      sessionStorage.setItem('user', JSON.stringify(newUser));
-      sessionStorage.setItem('role', 'user');
-      sessionStorage.setItem('token', 'dummy-token-' + Date.now());
+      setOtpError('Kode OTP salah! Silakan coba lagi.');
     }
-    
-    // Redirect ke beranda user
-    navigate('/beranda');
+  };
+
+  // Format waktu cooldown
+  const formatCooldown = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins > 0) return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${secs} detik`;
   };
 
   return (
@@ -217,6 +309,71 @@ const Register = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal OTP Verifikasi */}
+      {showOTP && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowOTP(false)}>
+          <div className="bg-white rounded-2xl p-6 w-96 max-w-[90%] text-center" onClick={(e) => e.stopPropagation()}>
+            <div className="w-16 h-16 rounded-full bg-[#fcf5e8] flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-[#234c6a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Verifikasi 2 Langkah</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Masukkan kode verifikasi yang telah dikirim ke <strong className="text-[#234c6a]">{form.email}</strong>
+            </p>
+            
+            <input
+              type="text"
+              placeholder="000000"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              className="w-full border border-[#e5e0d8] rounded-xl p-3 text-center text-2xl tracking-[8px] font-mono focus:outline-none focus:ring-2 focus:ring-[#234c6a] mb-4"
+              maxLength={6}
+              autoFocus
+            />
+            
+            {otpError && (
+              <p className="text-red-500 text-sm mb-3">{otpError}</p>
+            )}
+            
+            <button
+              onClick={handleVerifyOTP}
+              disabled={otp.length !== 6}
+              className={`w-full py-2 rounded-lg font-semibold transition ${
+                otp.length === 6 
+                  ? 'bg-[#234c6a] text-white hover:bg-[#1a3d55]' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              Verifikasi
+            </button>
+            
+            <div className="mt-4 text-sm">
+              {resendCooldown > 0 ? (
+                <span className="text-gray-400">
+                  Kirim ulang dalam {formatCooldown(resendCooldown)}
+                </span>
+              ) : (
+                <button
+                  onClick={handleResendOTP}
+                  className="text-[#234c6a] hover:underline"
+                >
+                  Kirim Ulang Kode
+                </button>
+              )}
+            </div>
+            
+            <button
+              onClick={() => setShowOTP(false)}
+              className="w-full mt-3 text-gray-500 text-sm hover:text-gray-700"
+            >
+              Batal
+            </button>
+          </div>
+        </div>
+      )}
 
       <footer className="bg-[#234c6a] text-white/80 py-3 text-center text-[11px] w-full">
         © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.

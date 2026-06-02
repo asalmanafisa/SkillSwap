@@ -1,6 +1,6 @@
+// src/pages/User/Chat.jsx
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import Navbar from '../../components/Navbar';
 import { users } from '../../utils/dummyData';
 
 const STORAGE_CHATS = 'user_chats';
@@ -277,9 +277,20 @@ const Chat = () => {
       [selectedChatId]: [...(prev[selectedChatId] || []), newMsg]
     }));
     
-    setChats(prev => prev.map(chat => 
-      chat.id === selectedChatId ? { ...chat, lastMessage: `📎 ${fileData.name}`, time: new Date(now).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) } : chat
-    ));
+    setChats(prev => {
+      const updatedChats = prev.map(chat => 
+        chat.id === selectedChatId 
+          ? { ...chat, lastMessage: `📎 ${fileData.name}`, time: new Date(now).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) } 
+          : chat
+      );
+      const sortedChats = [...updatedChats];
+      const chatIndex = sortedChats.findIndex(c => c.id === selectedChatId);
+      if (chatIndex > -1) {
+        const [movedChat] = sortedChats.splice(chatIndex, 1);
+        sortedChats.unshift(movedChat);
+      }
+      return sortedChats;
+    });
     
     // Simulasi status sent
     setTimeout(() => {
@@ -314,9 +325,20 @@ const Chat = () => {
       [selectedChatId]: [...(prev[selectedChatId] || []), newMsg]
     }));
     
-    setChats(prev => prev.map(chat => 
-      chat.id === selectedChatId ? { ...chat, lastMessage: messageText, time: new Date(now).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) } : chat
-    ));
+    setChats(prev => {
+      const updatedChats = prev.map(chat => 
+        chat.id === selectedChatId 
+          ? { ...chat, lastMessage: messageText, time: new Date(now).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) } 
+          : chat
+      );
+      const sortedChats = [...updatedChats];
+      const chatIndex = sortedChats.findIndex(c => c.id === selectedChatId);
+      if (chatIndex > -1) {
+        const [movedChat] = sortedChats.splice(chatIndex, 1);
+        sortedChats.unshift(movedChat);
+      }
+      return sortedChats;
+    });
     
     setNewMessage('');
     
@@ -382,7 +404,202 @@ const Chat = () => {
     navigate(`/profil/${userId}`);
   };
 
-  // ... (fungsi grup lainnya tetap sama seperti sebelumnya: createGroup, joinGroupWithCode, leaveGroup, deleteGroup, copyGroupCode, makeAdmin, removeAdmin, kickMember, toggleMember, handleGroupPhoto)
+  // ========== FUNGSI GRUP ==========
+  const toggleMember = (userId) => {
+    setSelectedMembers(prev => 
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
+  };
+
+  const handleGroupPhoto = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setGroupPhoto(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const createGroup = () => {
+    if (!groupName.trim()) {
+      showNotification('Nama grup harus diisi', 'error');
+      return;
+    }
+    if (selectedMembers.length === 0) {
+      showNotification('Pilih minimal 1 anggota', 'error');
+      return;
+    }
+
+    const newGroupId = Date.now();
+    const groupCode = generateGroupCode();
+    const currentUser = { id: 0, name: 'Saya', isAdmin: true };
+    const membersList = [currentUser, ...selectedMembers.map(id => ({ id, name: users[id]?.name || `User ${id}`, isAdmin: false }))];
+
+    const newGroup = {
+      id: newGroupId, type: 'group', name: groupName, description: groupDescription, photo: groupPhoto,
+      code: groupCode, lastMessage: 'Grup baru dibuat', time: new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }),
+      memberCount: membersList.length, members: membersList, unread: 0, avatar: groupPhoto || '👥', createdBy: 0
+    };
+
+    setChats(prev => [newGroup, ...prev]);
+    setMessages(prev => ({ ...prev, [newGroupId]: [{ id: 1, sender: '', text: `Grup "${groupName}" dibuat dengan kode: ${groupCode}`, time: new Date().toISOString(), isSystem: true }] }));
+
+    const storedGroups = localStorage.getItem(STORAGE_GROUPS);
+    const groups = storedGroups ? JSON.parse(storedGroups) : [];
+    groups.push(newGroup);
+    localStorage.setItem(STORAGE_GROUPS, JSON.stringify(groups));
+
+    setGroupName(''); setGroupDescription(''); setGroupPhoto(''); setSelectedMembers([]);
+    setShowGroupModal(false); setSelectedChatId(newGroupId); setShowThreeDotsMenu(false);
+    showNotification(`Grup "${groupName}" berhasil dibuat! Kode grup: ${groupCode}`, 'success');
+  };
+
+  const joinGroupWithCode = () => {
+    if (!joinCode.trim()) {
+      setGroupCodeError('Masukkan kode grup');
+      return;
+    }
+    const storedGroups = localStorage.getItem(STORAGE_GROUPS);
+    const groups = storedGroups ? JSON.parse(storedGroups) : [];
+    const targetGroup = groups.find(g => g.code === joinCode.toUpperCase());
+
+    if (!targetGroup) {
+      setGroupCodeError('Kode grup tidak ditemukan');
+      showNotification('Kode grup tidak ditemukan', 'error');
+      return;
+    }
+    if (chats.find(c => c.id === targetGroup.id)) {
+      setGroupCodeError('Anda sudah tergabung');
+      showNotification('Anda sudah tergabung dalam grup ini', 'error');
+      return;
+    }
+
+    const updatedGroup = { ...targetGroup, members: [...targetGroup.members, { id: 0, name: 'Saya', isAdmin: false }], memberCount: targetGroup.memberCount + 1 };
+    setChats(prev => [updatedGroup, ...prev]);
+    
+    const updatedGroups = groups.map(g => g.id === targetGroup.id ? updatedGroup : g);
+    localStorage.setItem(STORAGE_GROUPS, JSON.stringify(updatedGroups));
+
+    setMessages(prev => ({ ...prev, [targetGroup.id]: [...(prev[targetGroup.id] || []), { id: Date.now(), sender: '', text: 'Saya bergabung ke grup', time: new Date().toISOString(), isSystem: true }] }));
+
+    setJoinCode(''); setGroupCodeError(''); setShowJoinGroupModal(false); setSelectedChatId(targetGroup.id);
+    showNotification(`Berhasil bergabung ke grup ${targetGroup.name}`, 'success');
+  };
+
+  const leaveGroup = () => {
+    const group = chats.find(c => c.id === selectedChatId);
+    if (!group || group.type !== 'group') return;
+    if (window.confirm(`Apakah Anda yakin ingin keluar dari grup "${group.name}"?`)) {
+      const updatedMembers = group.members.filter(m => m.id !== 0);
+      const updatedGroup = { ...group, members: updatedMembers, memberCount: updatedMembers.length };
+      setChats(prev => prev.map(c => c.id === selectedChatId ? updatedGroup : c));
+      
+      const storedGroups = localStorage.getItem(STORAGE_GROUPS);
+      const groups = storedGroups ? JSON.parse(storedGroups) : [];
+      const updatedGroups = groups.map(g => g.id === selectedChatId ? updatedGroup : g);
+      localStorage.setItem(STORAGE_GROUPS, JSON.stringify(updatedGroups));
+
+      setMessages(prev => ({ ...prev, [selectedChatId]: [...(prev[selectedChatId] || []), { id: Date.now(), sender: '', text: 'Saya keluar dari grup', time: new Date().toISOString(), isSystem: true }] }));
+      setShowGroupDetailModal(false);
+      setSelectedChatId(chats.find(c => c.id !== selectedChatId)?.id || null);
+      showNotification(`Anda telah keluar dari grup ${group.name}`, 'info');
+    }
+  };
+
+  const deleteGroup = () => {
+    const group = chats.find(c => c.id === selectedChatId);
+    if (!group || group.type !== 'group') return;
+    if (window.confirm(`Apakah Anda yakin ingin menghapus grup "${group.name}"?`)) {
+      setChats(prev => prev.filter(c => c.id !== selectedChatId));
+      const storedGroups = localStorage.getItem(STORAGE_GROUPS);
+      const groups = storedGroups ? JSON.parse(storedGroups) : [];
+      const updatedGroups = groups.filter(g => g.id !== selectedChatId);
+      localStorage.setItem(STORAGE_GROUPS, JSON.stringify(updatedGroups));
+      setShowGroupDetailModal(false);
+      setSelectedChatId(chats.find(c => c.id !== selectedChatId)?.id || null);
+      showNotification(`Grup "${group.name}" telah dihapus`, 'success');
+    }
+  };
+
+  const copyGroupCode = () => {
+    const group = chats.find(c => c.id === selectedChatId);
+    if (group?.code) {
+      navigator.clipboard.writeText(group.code);
+      showNotification('Kode grup disalin!', 'success');
+    }
+  };
+
+  const makeAdmin = (memberId, memberName) => {
+    const group = chats.find(c => c.id === selectedChatId);
+    if (!group || group.type !== 'group') return;
+    const updatedMembers = group.members.map(m => m.id === memberId ? { ...m, isAdmin: true } : m);
+    const updatedGroup = { ...group, members: updatedMembers };
+    setChats(prev => prev.map(c => c.id === selectedChatId ? updatedGroup : c));
+    
+    const storedGroups = localStorage.getItem(STORAGE_GROUPS);
+    const groups = storedGroups ? JSON.parse(storedGroups) : [];
+    const updatedGroups = groups.map(g => g.id === selectedChatId ? updatedGroup : g);
+    localStorage.setItem(STORAGE_GROUPS, JSON.stringify(updatedGroups));
+
+    setMessages(prev => ({ ...prev, [selectedChatId]: [...(prev[selectedChatId] || []), { id: Date.now(), sender: '', text: `${memberName} dijadikan admin`, time: new Date().toISOString(), isSystem: true }] }));
+    showNotification(`${memberName} dijadikan admin`, 'success');
+    setShowGroupDetailModal(false);
+  };
+
+  const removeAdmin = (memberId, memberName) => {
+    const group = chats.find(c => c.id === selectedChatId);
+    if (!group || group.type !== 'group') return;
+    const updatedMembers = group.members.map(m => m.id === memberId ? { ...m, isAdmin: false } : m);
+    const updatedGroup = { ...group, members: updatedMembers };
+    setChats(prev => prev.map(c => c.id === selectedChatId ? updatedGroup : c));
+    
+    const storedGroups = localStorage.getItem(STORAGE_GROUPS);
+    const groups = storedGroups ? JSON.parse(storedGroups) : [];
+    const updatedGroups = groups.map(g => g.id === selectedChatId ? updatedGroup : g);
+    localStorage.setItem(STORAGE_GROUPS, JSON.stringify(updatedGroups));
+
+    setMessages(prev => ({ ...prev, [selectedChatId]: [...(prev[selectedChatId] || []), { id: Date.now(), sender: '', text: `${memberName} dicopot dari admin`, time: new Date().toISOString(), isSystem: true }] }));
+    showNotification(`${memberName} dicopot dari admin`, 'info');
+    setShowGroupDetailModal(false);
+  };
+
+  const kickMember = (memberId, memberName) => {
+    const group = chats.find(c => c.id === selectedChatId);
+    if (!group || group.type !== 'group') return;
+    if (memberId === 0) {
+      showNotification('Tidak bisa mengeluarkan diri sendiri', 'error');
+      return;
+    }
+    const updatedMembers = group.members.filter(m => m.id !== memberId);
+    const updatedGroup = { ...group, members: updatedMembers, memberCount: updatedMembers.length };
+    setChats(prev => prev.map(c => c.id === selectedChatId ? updatedGroup : c));
+    
+    const storedGroups = localStorage.getItem(STORAGE_GROUPS);
+    const groups = storedGroups ? JSON.parse(storedGroups) : [];
+    const updatedGroups = groups.map(g => g.id === selectedChatId ? updatedGroup : g);
+    localStorage.setItem(STORAGE_GROUPS, JSON.stringify(updatedGroups));
+
+    setMessages(prev => ({ ...prev, [selectedChatId]: [...(prev[selectedChatId] || []), { id: Date.now(), sender: '', text: `${memberName} dikeluarkan dari grup`, time: new Date().toISOString(), isSystem: true }] }));
+    showNotification(`${memberName} dikeluarkan dari grup`, 'info');
+    setShowGroupDetailModal(false);
+  };
+
+  const handleRatingSkip = () => {
+    setShowInlineRating(false);
+    setRatingValue(0);
+    setRatingReview('');
+  };
+
+  const handleRatingSubmit = () => {
+    if (inlineRatingPartner) {
+      localStorage.setItem(`rated_${inlineRatingPartner.id}`, 'true');
+      setRatedPartnerName(inlineRatingPartner.name);
+      setShowInlineRating(false);
+      setShowRatingSuccess(true);
+      setRatingValue(0);
+      setRatingReview('');
+    }
+  };
 
   const selectedChat = chats.find(c => c.id === selectedChatId);
   const currentMessages = messages[selectedChatId] || [];
@@ -392,7 +609,6 @@ const Chat = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Poppins', sans-serif", backgroundColor: '#fcf5e8' }}>
-        <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-gray-500">Memuat chat...</div>
         </div>
@@ -402,7 +618,6 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Poppins', sans-serif", backgroundColor: '#fcf5e8' }}>
-      <Navbar />
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/*,application/pdf,.doc,.docx" onChange={onFileSelected} />
       
       <div className="flex-1 flex overflow-hidden w-full">
@@ -641,10 +856,6 @@ const Chat = () => {
         </div>
       </div>
 
-      <footer className="bg-[#234c6a] text-white/80 py-3 text-center text-[11px] w-full">
-        © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
-      </footer>
-
       {/* Modal Notifikasi */}
       {showNotificationModal && (
         <div className="fixed top-20 right-5 z-50 animate-slide-in">
@@ -673,9 +884,167 @@ const Chat = () => {
         </div>
       )}
 
-      {/* Modal Buat Grup - (sama seperti sebelumnya, disimpan tapi tidak ditulis ulang karena panjang) */}
-      {/* Modal Gabung Grup - (sama seperti sebelumnya) */}
-      {/* Modal Detail Grup - (sama seperti sebelumnya) */}
+      {/* Modal Buat Grup */}
+      {showGroupModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowGroupModal(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl w-[500px] max-w-[90%] max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b p-4 flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Buat Grup Baru</h3>
+              <button onClick={() => setShowGroupModal(false)} className="text-gray-400 hover:text-gray-600">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-5">
+              <div className="flex justify-center mb-4">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+                    {groupPhoto ? <img src={groupPhoto} className="w-full h-full object-cover" /> : (
+                      <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    )}
+                  </div>
+                  <label className="absolute bottom-0 right-0 bg-[#234c6a] rounded-full p-1 cursor-pointer">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /></svg>
+                    <input type="file" accept="image/*" onChange={handleGroupPhoto} hidden />
+                  </label>
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Grup <span className="text-red-500">*</span></label>
+                <input type="text" value={groupName} onChange={e => setGroupName(e.target.value)} placeholder="Contoh: Belajar React Bareng" className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deskripsi (Opsional)</label>
+                <textarea rows="2" value={groupDescription} onChange={e => setGroupDescription(e.target.value)} placeholder="Ceritakan tujuan grup ini..." className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pilih Anggota <span className="text-red-500">*</span></label>
+                <div className="border border-gray-300 dark:border-gray-600 rounded-lg max-h-48 overflow-y-auto">
+                  {availableContacts.map(contact => (
+                    <label key={contact.id} className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b last:border-0">
+                      <input type="checkbox" checked={selectedMembers.includes(contact.id)} onChange={() => toggleMember(contact.id)} className="w-4 h-4 text-[#234c6a] rounded" />
+                      <div className="w-8 h-8 rounded-full bg-[#234c6a] text-white flex items-center justify-center text-xs">{contact.name.charAt(0)}</div>
+                      <div>
+                        <p className="font-medium text-gray-800 dark:text-white">{contact.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{contact.role}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-5">
+                <p className="text-sm text-gray-600 dark:text-gray-300"><span className="font-semibold">{selectedMembers.length + 1}</span> anggota termasuk Anda</p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setShowGroupModal(false)} className="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Batal</button>
+                <button onClick={createGroup} className="flex-1 py-2 rounded-lg bg-[#234c6a] text-white hover:bg-[#1a3d55]">Buat Grup</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Gabung Grup */}
+      {showJoinGroupModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowJoinGroupModal(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-96 max-w-[90%]" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Gabung Grup</h3>
+              <button onClick={() => setShowJoinGroupModal(false)} className="text-gray-400 hover:text-gray-600">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Masukkan Kode Grup</label>
+              <input type="text" placeholder="Contoh: REACT42" value={joinCode} onChange={e => setJoinCode(e.target.value.toUpperCase())} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-center text-lg font-mono tracking-wider uppercase focus:ring-2 focus:ring-[#234c6a] focus:border-transparent dark:bg-gray-700 dark:text-white" maxLength={8} autoFocus />
+              {groupCodeError && <p className="text-red-500 text-xs mt-2">{groupCodeError}</p>}
+              <p className="text-xs text-gray-400 mt-2">Masukkan kode 6 digit yang didapat dari admin grup</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setShowJoinGroupModal(false)} className="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">Batal</button>
+              <button onClick={joinGroupWithCode} className="flex-1 py-2 rounded-lg bg-[#234c6a] text-white">Gabung</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detail Grup */}
+      {showGroupDetailModal && selectedChat?.type === 'group' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowGroupDetailModal(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl w-[400px] max-w-[90%] max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="p-5 text-center border-b border-[#e5e0d8] dark:border-gray-700">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                {selectedChat.photo ? <img src={selectedChat.photo} className="w-full h-full object-cover" /> : <span className="text-4xl">👥</span>}
+              </div>
+              <h3 className="font-bold text-xl text-gray-800 dark:text-white">{selectedChat.name}</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">{selectedChat.memberCount} anggota</p>
+              {selectedChat.description && <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">"{selectedChat.description}"</p>}
+            </div>
+            <div className="p-4 border-b border-[#e5e0d8] dark:border-gray-700">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">Dibuat oleh Anda</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">Kode Grup</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-lg font-mono text-sm font-bold tracking-wider">{selectedChat.code}</code>
+                  <button onClick={copyGroupCode} className="text-gray-400 hover:text-gray-600" title="Salin kode">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="font-semibold text-gray-800 dark:text-white">Anggota</h4>
+                <span className="text-xs text-gray-400">{selectedChat.memberCount} orang</span>
+              </div>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {selectedChat.members?.map(member => {
+                  const isCurrentUserAdmin = selectedChat.createdBy === 0;
+                  const isAdmin = member.isAdmin;
+                  const isCreator = member.id === 0;
+                  return (
+                    <div key={member.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#234c6a] text-white flex items-center justify-center text-xs font-bold">{member.name.charAt(0)}</div>
+                        <div>
+                          <p className="font-medium text-gray-800 dark:text-white">{member.name}</p>
+                          {isAdmin && <span className="text-xs text-[#234c6a]">Admin</span>}
+                          {isCreator && <span className="text-xs text-gray-400 ml-1">(Anda)</span>}
+                        </div>
+                      </div>
+                      {isCurrentUserAdmin && !isCreator && (
+                        <div className="relative">
+                          <button className="member-menu-button opacity-0 group-hover:opacity-100 transition p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" onClick={() => { const menuId = `member-menu-${member.id}`; const menu = document.getElementById(menuId); document.querySelectorAll('.member-menu').forEach(m => m.classList.add('hidden')); if (menu) menu.classList.toggle('hidden'); }}>
+                            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                          </button>
+                          <div id={`member-menu-${member.id}`} className="member-menu hidden absolute right-0 mt-1 w-40 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-20">
+                            {!isAdmin ? 
+                              <button onClick={() => makeAdmin(member.id, member.name)} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Jadikan Admin</button> : 
+                              <button onClick={() => removeAdmin(member.id, member.name)} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Copot Admin</button>
+                            }
+                            <button onClick={() => kickMember(member.id, member.name)} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30">Keluarkan</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="border-t border-[#e5e0d8] dark:border-gray-700 p-4 flex gap-2">
+              <button onClick={leaveGroup} className="flex-1 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition">Keluar dari Grup</button>
+              {selectedChat.createdBy === 0 && <button onClick={deleteGroup} className="flex-1 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition">Hapus Grup</button>}
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         @keyframes slideIn {

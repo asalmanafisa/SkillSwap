@@ -545,7 +545,6 @@ const Pengaturan = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Poppins', sans-serif", backgroundColor: '#fcf5e8' }}>
-      <Navbar />
       <div className="max-w-7xl w-full mx-auto px-5 py-8 flex-1">
         <div className="mb-8">
           <h1 className="font-serif text-3xl md:text-4xl font-bold text-gray-800">Pengaturan</h1>
@@ -592,7 +591,6 @@ const Pengaturan = () => {
           <div className="flex-1 bg-white rounded-2xl shadow-sm border border-[#e5e0d8] p-6 md:p-8">{renderContent()}</div>
         </div>
       </div>
-      <footer className="bg-[#234c6a] text-white/80 py-3 text-center text-[11px] w-full">© 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.</footer>
       <FloatingChatButton />
 
       {toast.show && (

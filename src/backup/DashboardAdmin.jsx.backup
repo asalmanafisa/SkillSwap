@@ -8,84 +8,8 @@ import {
   LogOut, 
   Activity, 
   AlertTriangle, 
-  UserX,
-  CheckCircle
+  UserX 
 } from "lucide-react";
-
-// ── Modal Notifikasi ──────────────────────────────────────
-function NotificationModal({ message, type, onClose }) {
-  return (
-    <div style={{
-      position: "fixed",
-      inset: 0,
-      background: "rgba(0,0,0,0.5)",
-      backdropFilter: "blur(4px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 2000,
-    }}>
-      <div style={{
-        background: "white",
-        borderRadius: 20,
-        padding: "28px 32px",
-        width: 360,
-        maxWidth: "90%",
-        textAlign: "center",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-      }}>
-        <div style={{
-          width: 56,
-          height: 56,
-          borderRadius: "50%",
-          background: type === "success" ? "#dcfce7" : "#fee2e2",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          margin: "0 auto 16px",
-        }}>
-          {type === "success" ? (
-            <CheckCircle size={28} color="#22c55e" />
-          ) : (
-            <AlertTriangle size={28} color="#ef4444" />
-          )}
-        </div>
-        <h3 style={{
-          fontSize: "1.1rem",
-          fontWeight: 700,
-          color: "#1e293b",
-          margin: "0 0 8px",
-        }}>
-          {type === "success" ? "Berhasil!" : "Perhatian"}
-        </h3>
-        <p style={{
-          fontSize: "0.85rem",
-          color: "#64748b",
-          margin: "0 0 24px",
-          lineHeight: 1.5,
-        }}>
-          {message}
-        </p>
-        <button
-          onClick={onClose}
-          style={{
-            padding: "10px 24px",
-            borderRadius: 12,
-            border: "none",
-            background: "#1e3a5f",
-            color: "white",
-            fontSize: "0.85rem",
-            fontWeight: 600,
-            cursor: "pointer",
-            width: "100%",
-          }}
-        >
-          Tutup
-        </button>
-      </div>
-    </div>
-  );
-}
 
 const laporanMasuk = [
   { id: 1, title: "Konten tidak pantas", desc: "Dilaporkan oleh Amira Salma Nafisa", color: "#ef4444" },
@@ -102,10 +26,10 @@ const daftarPengguna = [
 ];
 
 const statCards = [
-  { label: "Total Pengguna", value: "5", sub: "+1 bulan ini", subColor: "#22c55e", icon: <Users size={20} color="#3b82f6" />, iconBg: "#eff6ff" },
-  { label: "Sesi Aktif", value: "4", sub: "+2 minggu ini", subColor: "#22c55e", icon: <Activity size={20} color="#22c55e" />, iconBg: "#f0fdf4" },
-  { label: "Laporan Masuk", value: "4", sub: "+2 minggu ini", subColor: "#ef4444", icon: <AlertTriangle size={20} color="#f97316" />, iconBg: "#fff7ed" },
-  { label: "Pengguna Tersuspend", value: "1", sub: "+1 minggu ini", subColor: "#ef4444", icon: <UserX size={20} color="#ef4444" />, iconBg: "#fef2f2" },
+  { label: "Total Pengguna", value: "5", sub: "+1 bulan ini", subColor: "#22c55e", icon: <Users size={20} />, iconBg: "#eff6ff", iconColor: "#3b82f6" },
+  { label: "Sesi Aktif", value: "4", sub: "+2 minggu ini", subColor: "#22c55e", icon: <Activity size={20} />, iconBg: "#f0fdf4", iconColor: "#22c55e" },
+  { label: "Laporan Masuk", value: "4", sub: "+2 minggu ini", subColor: "#ef4444", icon: <AlertTriangle size={20} />, iconBg: "#fff7ed", iconColor: "#f97316" },
+  { label: "Pengguna Tersuspend", value: "1", sub: "+1 minggu ini", subColor: "#ef4444", icon: <UserX size={20} />, iconBg: "#fef2f2", iconColor: "#ef4444" },
 ];
 
 function SidebarAdmin({ active }) {
@@ -121,11 +45,11 @@ function SidebarAdmin({ active }) {
   return (
     <aside style={{
       width: 200, minHeight: "100vh", background: "white",
-      borderRight: "1px solid #e5e0d8",
+      borderRight: "1px solid #f1f5f9",
       display: "flex", flexDirection: "column",
       padding: "20px 0", flexShrink: 0,
     }}>
-      <div style={{ padding: "0 16px 20px", borderBottom: "1px solid #e5e0d8", marginBottom: 12 }}>
+      <div style={{ padding: "0 16px 20px", borderBottom: "1px solid #f1f5f9", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{
             width: 32, height: 32, borderRadius: 8,
@@ -189,37 +113,34 @@ function SidebarAdmin({ active }) {
 
       {showLogout && (
         <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-          backdropFilter: "blur(4px)", display: "flex",
-          alignItems: "center", justifyContent: "center", zIndex: 1000,
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
         }}>
           <div style={{
-            background: "white", borderRadius: 20,
-            padding: "32px 28px", width: 340,
-            boxShadow: "0 20px 60px rgba(0,0,0,0.3)", textAlign: "center",
+            background: "white", borderRadius: 16,
+            padding: "28px 24px", width: 300,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.15)", textAlign: "center",
           }}>
             <div style={{
-              width: 56, height: 56, borderRadius: "50%",
-              background: "#fef2f2", fontSize: "1.8rem",
+              width: 48, height: 48, borderRadius: "50%",
+              background: "#fef2f2", fontSize: "1.3rem",
               display: "flex", alignItems: "center", justifyContent: "center",
-              margin: "0 auto 16px",
+              margin: "0 auto 14px",
             }}>👋</div>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a", margin: "0 0 8px" }}>Keluar dari Panel?</h3>
-            <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "0 0 24px", lineHeight: 1.5 }}>
-              Apakah Anda yakin ingin keluar dari panel Admin SkillSwap?
+            <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: "0 0 8px" }}>Keluar?</h3>
+            <p style={{ fontSize: "0.78rem", color: "#64748b", margin: "0 0 20px", lineHeight: 1.5 }}>
+              Apakah anda yakin ingin keluar dari panel Admin?
             </p>
-            <div style={{ display: "flex", gap: 12 }}>
+            <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => setShowLogout(false)} style={{
-                flex: 1, padding: "10px", borderRadius: 12,
+                flex: 1, padding: "9px", borderRadius: 10,
                 border: "1px solid #e2e8f0", background: "white",
-                color: "#64748b", fontSize: "0.85rem",
-                fontWeight: 500, cursor: "pointer",
+                color: "#64748b", fontSize: "0.83rem", cursor: "pointer",
               }}>Batal</button>
               <button onClick={() => { window.location.href = "/"; }} style={{
-                flex: 1, padding: "10px", borderRadius: 12,
+                flex: 1, padding: "9px", borderRadius: 10,
                 border: "none", background: "#ef4444",
-                color: "white", fontSize: "0.85rem",
-                fontWeight: 600, cursor: "pointer",
+                color: "white", fontSize: "0.83rem", fontWeight: 600, cursor: "pointer",
               }}>Ya, Keluar</button>
             </div>
           </div>
@@ -234,88 +155,58 @@ export default function DashboardAdmin() {
   const [showSuspend, setShowSuspend] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [penggunaList, setPenggunaList] = useState(daftarPengguna);
-  const [notification, setNotification] = useState(null);
-
-  const handleSuspendToggle = () => {
-    setPenggunaList((prev) =>
-      prev.map((u) =>
-        u.id === selectedUser.id
-          ? { ...u, status: u.status === "Aktif" ? "Suspended" : "Aktif" }
-          : u
-      )
-    );
-    setNotification({
-      message: `${selectedUser.nama} berhasil ${selectedUser.status === "Aktif" ? "disuspend" : "diaktifkan kembali"}!`,
-      type: "success"
-    });
-    setShowSuspend(false);
-    setSelectedUser(null);
-  };
 
   return (
     <div style={{
-      display: "flex", minHeight: "100vh",
-      background: "#fcf5e8", fontFamily: "'Inter', 'Poppins', 'Segoe UI', sans-serif",
+      display: "flex", height: "100vh", overflow: "hidden",
+      background: "#f8f7f4", fontFamily: "'Poppins','Segoe UI',sans-serif",
     }}>
       <SidebarAdmin active="dashboard" />
 
-      <main style={{ 
-        flex: 1, 
-        padding: "24px 28px", 
-        overflow: "visible",
-        minWidth: 0 
-      }}>
+      <main style={{ flex: 1, padding: "18px 22px", overflowY: "auto", minWidth: 0 }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 24, textAlign: "left" }}>
-          <h1 style={{ 
-            fontSize: "2rem", 
-            fontWeight: 700, 
-            color: "#1e293b", 
-            margin: 0,
-            fontFamily: "'Fraunces', 'Poppins', serif"
-          }}>
+        <div style={{ marginBottom: 16, textAlign: "left" }}>
+          <h1 style={{ fontSize: "1.4rem", fontWeight: 700, color: "#1e293b", margin: 0 }}>
             Dashboard Admin
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "#94a3b8", margin: "8px 0 0" }}>
+          <p style={{ fontSize: "0.78rem", color: "#94a3b8", margin: "4px 0 0" }}>
             Selamat datang kembali, Admin. Berikut ringkasan aktivitas SkillSwap.
           </p>
         </div>
 
-        {/* Stat Cards - ukuran sama seperti Kelola Pengguna */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 24 }}>
+        {/* Stat Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}>
           {statCards.map((c) => (
             <div key={c.label} style={{
-              background: "white", borderRadius: 16,
+              background: "white", borderRadius: 14,
               padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <span style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: 500 }}>{c.label}</span>
                 <div style={{
-                  width: 40, height: 40, borderRadius: 12,
-                  background: c.iconBg,
+                  width: 34, height: 34, borderRadius: 10,
+                  background: c.iconBg, color: c.iconColor,
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
                   {c.icon}
                 </div>
-                <span style={{ fontSize: "0.75rem", fontWeight: 600, color: c.subColor }}>
-                  {c.subColor === "#22c55e" ? "▲" : "▼"} {c.sub}
-                </span>
               </div>
-              <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#94a3b8", letterSpacing: "0.05em", marginBottom: 6 }}>
-                {c.label}
+              <div style={{ fontSize: "1.4rem", fontWeight: 700, color: "#1e293b", lineHeight: 1 }}>{c.value}</div>
+              <div style={{ fontSize: "0.72rem", color: c.subColor, marginTop: 6 }}>
+                {c.subColor === "#22c55e" ? "▲" : "▼"} {c.sub}
               </div>
-              <div style={{ fontSize: "1.6rem", fontWeight: 700, color: "#1e293b" }}>{c.value}</div>
             </div>
           ))}
         </div>
 
         {/* Tengah */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 12 }}>
 
           {/* Laporan Masuk */}
-          <div style={{ background: "white", borderRadius: 20, padding: "20px 24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h2 style={{ fontSize: "1rem", fontWeight: 600, color: "#1e293b", margin: 0 }}>Laporan Masuk</h2>
+          <div style={{ background: "white", borderRadius: 14, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <h2 style={{ fontSize: "0.9rem", fontWeight: 600, color: "#1e293b", margin: 0 }}>Laporan Masuk</h2>
               <a href="#" onClick={(e) => { e.preventDefault(); navigate("/admin/kelola-laporan"); }}
                 style={{ fontSize: "0.78rem", color: "#3b82f6", textDecoration: "none", fontWeight: 500 }}>
                 Lihat semua
@@ -324,15 +215,15 @@ export default function DashboardAdmin() {
             <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
               {laporanMasuk.map((item) => (
                 <li key={item.id} style={{
-                  display: "flex", alignItems: "flex-start", gap: 12,
-                  padding: "12px 0", borderBottom: "1px solid #f1f5f9",
+                  display: "flex", alignItems: "flex-start", gap: 10,
+                  padding: "9px 0", borderBottom: "1px solid #f1f5f9",
                 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: item.color, marginTop: 6, flexShrink: 0 }} />
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: item.color, marginTop: 5, flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#1e293b" }}>
+                    <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "#1e293b", display: "flex", alignItems: "center", gap: 6 }}>
                       {item.title}
                     </div>
-                    <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: 2 }}>
+                    <div style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {item.desc}
                     </div>
                   </div>
@@ -342,16 +233,16 @@ export default function DashboardAdmin() {
           </div>
 
           {/* Kelola Pengguna */}
-          <div style={{ background: "white", borderRadius: 20, padding: "20px 24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h2 style={{ fontSize: "1rem", fontWeight: 600, color: "#1e293b", margin: 0 }}>Kelola Pengguna</h2>
+          <div style={{ background: "white", borderRadius: 14, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <h2 style={{ fontSize: "0.9rem", fontWeight: 600, color: "#1e293b", margin: 0 }}>Kelola Pengguna</h2>
               <a href="#" onClick={(e) => { e.preventDefault(); navigate("/admin/kelola-pengguna"); }}
                 style={{ fontSize: "0.78rem", color: "#3b82f6", textDecoration: "none", fontWeight: 500 }}>
                 Lihat semua
               </a>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 80px", gap: 8, padding: "8px 4px", marginBottom: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 80px", gap: 8, padding: "6px 8px", marginBottom: 4 }}>
               {["PENGGUNA", "STATUS", "AKSI"].map((h) => (
                 <div key={h} style={{ fontSize: "0.68rem", fontWeight: 700, color: "#94a3b8", letterSpacing: "0.06em" }}>{h}</div>
               ))}
@@ -359,30 +250,30 @@ export default function DashboardAdmin() {
 
             {penggunaList.map((user) => (
               <div key={user.id} style={{
-                display: "grid", gridTemplateColumns: "1fr 100px 80px",
-                gap: 8, padding: "12px 4px", alignItems: "center",
+                display: "grid", gridTemplateColumns: "1fr 120px 80px",
+                gap: 8, padding: "10px 8px", alignItems: "center",
                 borderBottom: "1px solid #f8fafc",
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{
-                    width: 36, height: 36, borderRadius: "50%",
+                    width: 34, height: 34, borderRadius: "50%",
                     background: user.warna, color: "white",
-                    fontSize: "0.75rem", fontWeight: 700,
+                    fontSize: "0.68rem", fontWeight: 700,
                     display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                   }}>{user.avatar}</div>
                   <div>
-                    <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#1e293b" }}>{user.nama}</div>
-                    <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>{user.role}</div>
+                    <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "#1e293b" }}>{user.nama}</div>
+                    <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>{user.role}</div>
                   </div>
                 </div>
                 <div>
                   <span style={{
-                    display: "inline-flex", alignItems: "center", gap: 6,
-                    background: user.status === "Aktif" ? "#f0fdf4" : "#fef2f2",
-                    color: user.status === "Aktif" ? "#22c55e" : "#ef4444",
-                    fontSize: "0.7rem", fontWeight: 600, padding: "4px 12px", borderRadius: 20,
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                    background: user.status === "Aktif" ? "#f0fdf4" : "#fff7ed",
+                    color: user.status === "Aktif" ? "#22c55e" : "#f97316",
+                    fontSize: "0.7rem", fontWeight: 600, padding: "3px 10px", borderRadius: 20,
                   }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: user.status === "Aktif" ? "#22c55e" : "#ef4444" }} />
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: user.status === "Aktif" ? "#22c55e" : "#f97316" }} />
                     {user.status}
                   </span>
                 </div>
@@ -390,14 +281,14 @@ export default function DashboardAdmin() {
                   <button
                     onClick={() => { setSelectedUser(user); setShowSuspend(true); }}
                     style={{
-                      padding: "5px 14px", borderRadius: 8,
-                      border: "none",
-                      background: user.status === "Aktif" ? "#fef2f2" : "#dcfce7",
-                      color: user.status === "Aktif" ? "#ef4444" : "#22c55e",
+                      padding: "4px 12px", borderRadius: 6,
+                      border: user.status === "Aktif" ? "1px solid #fecaca" : "1px solid #fed7aa",
+                      background: user.status === "Aktif" ? "#fef2f2" : "#fff7ed",
+                      color: user.status === "Aktif" ? "#ef4444" : "#f97316",
                       fontSize: "0.72rem", fontWeight: 600, cursor: "pointer",
                     }}
                   >
-                    {user.status === "Aktif" ? "Suspend" : "Aktifkan"}
+                    {user.status === "Aktif" ? "Suspend" : "Tinjau"}
                   </button>
                 </div>
               </div>
@@ -405,44 +296,49 @@ export default function DashboardAdmin() {
           </div>
         </div>
 
-        {/* Popup Konfirmasi Suspend - modal tengah */}
+        {/* Footer */}
+        <div style={{ textAlign: "center", marginTop: 28, fontSize: "0.72rem", color: "#94a3b8", paddingBottom: 16 }}>
+          © 2026 SkillSwap — Universitas Brawijaya. All Rights Reserved.
+        </div>
+
+        {/* Popup Konfirmasi Suspend */}
         {showSuspend && selectedUser && (
           <div style={{
             position: "fixed", inset: 0,
-            background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)",
+            background: "rgba(0,0,0,0.35)",
             display: "flex", alignItems: "center", justifyContent: "center",
             zIndex: 1000,
           }}>
             <div style={{
-              background: "white", borderRadius: 20,
-              padding: "32px 28px", width: 340,
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              background: "white", borderRadius: 16,
+              padding: "28px 24px", width: 340,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
               textAlign: "center",
             }}>
               <div style={{
-                width: 56, height: 56, borderRadius: "50%",
-                background: "#fff7ed", fontSize: "1.6rem",
+                width: 52, height: 52, borderRadius: "50%",
+                background: "#fff7ed", fontSize: "1.4rem",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 margin: "0 auto 16px",
               }}>⚠️</div>
 
-              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a", margin: "0 0 8px" }}>
+              <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#0f172a", margin: "0 0 8px" }}>
                 {selectedUser.status === "Aktif" ? "Suspend Pengguna?" : "Aktifkan Pengguna?"}
               </h3>
-              <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "0 0 6px", lineHeight: 1.5 }}>
+              <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "0 0 6px", lineHeight: 1.5 }}>
                 {selectedUser.status === "Aktif"
-                  ? "Apakah Anda yakin ingin mensuspend"
-                  : "Apakah Anda yakin ingin mengaktifkan kembali"}
+                  ? "Apakah anda yakin ingin mensuspend"
+                  : "Apakah anda yakin ingin mengaktifkan kembali"}
               </p>
-              <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "#1e293b", margin: "0 0 24px" }}>
+              <p style={{ fontSize: "0.88rem", fontWeight: 700, color: "#1e293b", margin: "0 0 20px" }}>
                 {selectedUser.nama}?
               </p>
 
-              <div style={{ display: "flex", gap: 12 }}>
+              <div style={{ display: "flex", gap: 10 }}>
                 <button
                   onClick={() => { setShowSuspend(false); setSelectedUser(null); }}
                   style={{
-                    flex: 1, padding: "10px", borderRadius: 12,
+                    flex: 1, padding: "10px", borderRadius: 10,
                     border: "1px solid #e2e8f0", background: "white",
                     color: "#64748b", fontSize: "0.85rem",
                     fontWeight: 500, cursor: "pointer",
@@ -451,9 +347,19 @@ export default function DashboardAdmin() {
                   Batal
                 </button>
                 <button
-                  onClick={handleSuspendToggle}
+                  onClick={() => {
+                    setPenggunaList((prev) =>
+                      prev.map((u) =>
+                        u.id === selectedUser.id
+                          ? { ...u, status: u.status === "Aktif" ? "Suspended" : "Aktif" }
+                          : u
+                      )
+                    );
+                    setShowSuspend(false);
+                    setSelectedUser(null);
+                  }}
                   style={{
-                    flex: 1, padding: "10px", borderRadius: 12,
+                    flex: 1, padding: "10px", borderRadius: 10,
                     border: "none",
                     background: selectedUser.status === "Aktif" ? "#ef4444" : "#22c55e",
                     color: "white", fontSize: "0.85rem",
@@ -465,15 +371,6 @@ export default function DashboardAdmin() {
               </div>
             </div>
           </div>
-        )}
-
-        {/* Modal Notifikasi */}
-        {notification && (
-          <NotificationModal
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-          />
         )}
       </main>
     </div>
